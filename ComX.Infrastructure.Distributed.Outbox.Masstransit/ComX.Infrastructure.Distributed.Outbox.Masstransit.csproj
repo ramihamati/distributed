@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Version>1.0.0.0</Version>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
+		<Company>Digitteck Srl</Company>
+		<Authors>Digitteck Srl</Authors>
+		<Copyright>Copyright Digitteck 2021</Copyright>
+        <PackageTags>microservices;outbox;asp.net core</PackageTags>
+        <IsPackable>true</IsPackable>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="MassTransit" Version="7.3.0" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\ComX.Infrastructure.Distributed.Outbox\ComX.Infrastructure.Distributed.Outbox.csproj" />
+    </ItemGroup>
+</Project>
