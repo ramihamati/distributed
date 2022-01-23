@@ -9,16 +9,17 @@ namespace ComX.Infrastructure.Distributed.Outbox;
 /// 
 /// And because in some scenarios we must use an external repository we expose only some methods
 /// </summary>
-public class OutboxRepositoryEntityFramework : IOutboxRepository
+public class OutboxRepositoryEntityFramework<TMessageLog> : IOutboxRepository<TMessageLog>
+    where TMessageLog : class, IIntegrationMessageLog
 {
-    private readonly IRepository<IntegrationMessageLog> _repository;
+    private readonly IRepository<TMessageLog> _repository;
 
     public OutboxRepositoryEntityFramework(
-        IRepository<IntegrationMessageLog> repository)
+        IRepository<TMessageLog> repository)
     {
         _repository = repository;
     }
-    public Task DeleteAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default)
+    public Task DeleteAsync(TMessageLog entity, CancellationToken cancellationToken = default)
     {
         _repository.Delete(entity);
         return Task.CompletedTask;
@@ -29,16 +30,16 @@ public class OutboxRepositoryEntityFramework : IOutboxRepository
         return _repository.ExistsAsync(entityId, cancellationToken);
     }
 
-    public Task<IntegrationMessageLog> FindAsync(Guid entityId, CancellationToken cancellationToken = default)
+    public Task<TMessageLog> FindAsync(Guid entityId, CancellationToken cancellationToken = default)
     {
         return _repository.FindAsync(entityId, cancellationToken);
     }
 
-    public async Task<List<IntegrationMessageLog>> FindAsync(
+    public async Task<List<TMessageLog>> FindAsync(
         FinderMessageLog finder,
         CancellationToken cancellationToken = default)
     {
-        IQuery<IntegrationMessageLog> query = _repository.Query();
+        IQuery<TMessageLog> query = _repository.Query();
         
         query = ApplyFilterOptions(finder, query);
         query = ApplyFinderOptions(finder, query);
@@ -47,20 +48,20 @@ public class OutboxRepositoryEntityFramework : IOutboxRepository
         return (await query.SelectAsync(cancellationToken)).ToList();
     }
 
-    public Task InsertAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default)
+    public Task InsertAsync(TMessageLog entity, CancellationToken cancellationToken = default)
     {
         _repository.Insert(entity);
         return Task.CompletedTask;
     }
 
-    public Task UpdateAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(TMessageLog entity, CancellationToken cancellationToken = default)
     {
         _repository.Update(entity);
         return Task.CompletedTask;
     }
 
     #region [ Private ]
-    private static IQuery<IntegrationMessageLog> ApplyFilterOptions(FinderMessageLog finder, IQuery<IntegrationMessageLog> query)
+    private static IQuery<TMessageLog> ApplyFilterOptions(FinderMessageLog finder, IQuery<TMessageLog> query)
     {
         FilterMessageLog filter = finder.Filter;
 
@@ -88,7 +89,7 @@ public class OutboxRepositoryEntityFramework : IOutboxRepository
         return query;
     }
 
-    private static IQuery<IntegrationMessageLog> ApplyFinderOptions(FinderMessageLog finder, IQuery<IntegrationMessageLog> query)
+    private static IQuery<TMessageLog> ApplyFinderOptions(FinderMessageLog finder, IQuery<TMessageLog> query)
     {
         if (finder.Skip.HasValue)
         {

@@ -21,13 +21,13 @@ namespace Microsoft.Extensions.DependencyInjection
           where TConfiguration : class, IConfigurationTimer
           where TWorkerProcess : class, IWorkerProcess
         {
-            services.TryAddTransient<TWorkerProcess>();
+            services.TryAddScoped<TWorkerProcess>();
             services.TryAddScoped<IConfigurationTimer, TConfiguration>();
             services.AddHostedService<BackgroundWorker<TWorkerProcess>>(sp =>
             {
                 // we can register multiple times AddWorkerPRogramabilityTimer<> with different processes
                 // because the IConfiguration is specific to each IBAckgrondWorker, we cannot regsiter it in services
-                IConfigurationTimer configurationTimer = sp.CreateScope().ServiceProvider.GetService<IConfigurationTimer>();
+                IConfigurationTimer configurationTimer = sp.CreateScope().ServiceProvider.GetService<TConfiguration>();
                 if (configurationTimer is null)
                 {
                     configurationTimer = ActivatorUtilities.CreateInstance<TConfiguration>(sp);
@@ -54,7 +54,7 @@ namespace Microsoft.Extensions.DependencyInjection
             Func<IServiceProvider, IConfigurationTimer> configurationProvider)
                 where TWorkerProcess : class, IWorkerProcess
         {
-            services.TryAddTransient<TWorkerProcess>();
+            services.TryAddScoped<TWorkerProcess>();
             services.AddHostedService<BackgroundWorker<TWorkerProcess>>(sp =>
             {
                 // we can register multiple times AddWorkerPRogramabilityTimer<> with different processes
@@ -83,7 +83,7 @@ namespace Microsoft.Extensions.DependencyInjection
            IConfigurationTimer configuration)
            where TWorkerProcess : class, IWorkerProcess
         {
-            services.TryAddTransient<TWorkerProcess>();
+            services.TryAddScoped<TWorkerProcess>();
             services.AddHostedService<BackgroundWorker<TWorkerProcess>>(sp =>
             {
                 // we can register multiple times AddWorkerPRogramabilityTimer<> with different processes

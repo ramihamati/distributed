@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ComX.Infrastructure.Distributed.Outbox.Tests;
 
-public class MongoExternalRepository : IOutboxRepository
+public class MongoExternalRepository : IOutboxRepository<IntegrationMessageLog>
 {
     private readonly IMongoCollection<MongoOutboxDocument> _collection;
 

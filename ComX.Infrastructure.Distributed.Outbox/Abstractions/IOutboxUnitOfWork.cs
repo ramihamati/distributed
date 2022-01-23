@@ -1,13 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿namespace ComX.Infrastructure.Distributed.Outbox;
 
-namespace ComX.Infrastructure.Distributed.Outbox
+public interface IOutboxUnitOfWork
 {
-    public interface IOutboxUnitOfWork
-    {
-        public void BeginTransaction();
-        public void CommitTransaction();
-        public void RollbackTransaction();
-        public bool TransactionExists();
-        public Task SaveChangesAsync(System.Threading.CancellationToken cancellationToken = default);
-    }
+    public Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

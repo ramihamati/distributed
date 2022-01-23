@@ -44,7 +44,7 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
 
             serviceCollection.AddOutboxService(cfg =>
             {
-                cfg.RegisterEvents(reg =>
+                cfg.ConfigureEvents(reg =>
                 {
                     reg.RegisterMessage<IEventOne>(EVENT_ONE_NAME);
                     reg.RegisterMessage<IEventTwo>(EVENT_TWO_NAME);
@@ -134,8 +134,13 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
              */
             // Note : Use host.Services and not publisherServices because we are using SqlLite
             //        and after save the context is not synced
-            IOutboxRepository outboxRepository =
-                host.Services.GetService<IOutboxRepository>();
+
+            IOutboxRepository<IntegrationMessageLog> outboxRepository =
+                 host.Services
+                     .GetService<OutboxPublisherWorker<IntegrationMessageLog>>()
+                     .IsolatedServiceProvider
+                     .GetService<IOutboxRepository<IntegrationMessageLog>>();
+
             var log = (await outboxRepository.FindAsync(FinderMessageLog.New(FilterMessageLog.Empty, 1))).FirstOrDefault();
             Assert.IsNotNull(log);
             Assert.AreEqual(OutboxStatus.Published, log.Status);
@@ -192,8 +197,17 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
             IHost host = workerHost.Start();
             // Note : Use host.Services and not publisherServices because we are using SqlLite
             //        and after save the context is not synced
-            IOutboxRepository outboxRepository = host.Services.GetService<IOutboxRepository>();
-            IConfigurationOutboxWorker configuration = host.Services.GetService<IConfigurationOutboxWorker>();
+            IOutboxRepository<IntegrationMessageLog> outboxRepository =
+                host.Services
+                  .GetService<OutboxPublisherWorker<IntegrationMessageLog>>()
+                  .IsolatedServiceProvider
+                  .GetService<IOutboxRepository<IntegrationMessageLog>>();
+
+            IConfigurationOutboxWorker configuration =
+                host.Services
+                  .GetService<OutboxPublisherWorker<IntegrationMessageLog>>()
+                  .IsolatedServiceProvider
+                  .GetService<IConfigurationOutboxWorker>();
 
             // block until event is retrieved or timeout is reached
             // NOTE: IF YOU ARE DEBUGGIN INCREASWE THE TIMEOUT. OR THE WORKER HOST WILL CLOSE

@@ -26,7 +26,7 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
 
             serviceCollection.AddOutboxWorker(ConfigurationWorker, cfg =>
             {
-                cfg.RegisterEvents(reg =>
+                cfg.ConfigureEvents(reg =>
                 {
                     reg.RegisterMessage<IEventOne>(EVENT_ONE_NAME);
                     reg.RegisterMessage<IEventTwo>(EVENT_TWO_NAME);
@@ -35,7 +35,7 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
 
                 cfg.ConfigureStore(storeCfg =>
                 {
-                    storeCfg.UseRepository<InMemoryRepository>();
+                    storeCfg.UseRepository<InMemoryRepository, IntegrationMessageLog>();
                 });
 
                 cfg.ConfigurePublisher(pCfg =>
@@ -52,8 +52,13 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task Worker_WillNotPublish_LockedMessage()
         {
-            IOutboxStorage outboxStorage
-                = ServiceProvider.GetService<IOutboxStorage>();
+            IServiceProvider containerSP = ServiceProvider
+                  .GetService<OutboxPublisherWorker<IntegrationMessageLog>>()
+                  .IsolatedServiceProvider;
+
+            IOutboxStorage<IntegrationMessageLog> outboxStorage =
+                containerSP
+                .GetService<IOutboxStorage<IntegrationMessageLog>>();
 
             IntegrationMessageLog log1 = new()
             {
@@ -79,8 +84,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
             // because we are locking log1, the worker will not read it
             await outboxStorage.LockAsync(log1, TimeSpan.FromHours(1));
 
-            OutboxPublisherWorker workerInstance
-                = ActivatorUtilities.CreateInstance<OutboxPublisherWorker>(ServiceProvider);
+            OutboxPublisherWorker<IntegrationMessageLog> workerInstance
+                = ActivatorUtilities.CreateInstance<OutboxPublisherWorker<IntegrationMessageLog>>(containerSP);
 
             await workerInstance.ProcessAsync();
 

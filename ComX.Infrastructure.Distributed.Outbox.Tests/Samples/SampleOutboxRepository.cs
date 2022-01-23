@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ComX.Infrastructure.Distributed.Outbox.Tests
 {
-    public class SampleOutboxRepository : IOutboxRepository
+    public class SampleOutboxRepository : IOutboxRepository<IntegrationMessageLog>
     {
         public Task DeleteAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default)
         {

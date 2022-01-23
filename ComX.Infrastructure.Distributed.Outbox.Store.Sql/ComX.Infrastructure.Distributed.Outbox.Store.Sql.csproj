@@ -21,7 +21,4 @@
     <ItemGroup>
       <ProjectReference Include="..\ComX.Infrastructure.Distributed.Outbox\ComX.Infrastructure.Distributed.Outbox.csproj" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="UrfModels\" />
-    </ItemGroup>
 </Project>

@@ -6,22 +6,13 @@ namespace ComX.Infrastructure.Distributed.Outbox
 {
     internal class OutboxServiceRegistryBuilder : IOutboxServiceRegistryBuilder
     {
-        #region [ Fields ]
         private List<RegistryMessageInfo> MessageInfos { get; }
-        #endregion
 
-        #region [ Properties ]
-
-        #endregion
-
-        #region [ Constructor ]
         public OutboxServiceRegistryBuilder()
         {
             MessageInfos = new List<RegistryMessageInfo>();
         }
-        #endregion
 
-        #region [ Methods ]
         public void RegisterMessage<TMessageType>(string name)
         {
             if (MessageInfos.Any(r => r.Name == name))
@@ -29,13 +20,23 @@ namespace ComX.Infrastructure.Distributed.Outbox
                 throw new Exception($"A message with the outbox name {name} is already registered");
             }
 
-            MessageInfos.Add(new RegistryMessageInfo(typeof(TMessageType), name));
+            MessageInfos.Add(new RegistryMessageInfo(typeof(TMessageType), name, typeof(IntegrationMessageLog)));
         }
-            
+
+        public void RegisterMessage<TMessageType, TMessageLog>(string name)
+            where TMessageLog : class, IIntegrationMessageLog
+        {
+            if (MessageInfos.Any(r => r.Name == name))
+            {
+                throw new Exception($"A message with the outbox name {name} is already registered");
+            }
+
+            MessageInfos.Add(new RegistryMessageInfo(typeof(TMessageType), name, typeof(TMessageLog)));
+        }
+
         public IOutboxServiceRegistry Build()
         {
             return new OutboxServiceRegistry(MessageInfos);
         }
-        #endregion
     }
 }

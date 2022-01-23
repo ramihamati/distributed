@@ -6,8 +6,9 @@
 /// as registered <see cref="RegistryMessageInfo.MessageType"/> using the <see cref="IntegrationMessageLog.MessageTypeName"/>
 /// as the discriminator
 /// </summary>
-public interface IOutboxWorkerService
+public interface IOutboxWorkerService<TMessageLog>
+        where TMessageLog : class, IIntegrationMessageLog
 {
-    Task<List<IntegrationMessageLog>> FindAsync(FinderMessageLog finder, CancellationToken cancellationToken = default);
-    Task PublishAsync(IntegrationMessageLog message, CancellationToken cancellationToken = default);
+    Task<List<TMessageLog>> FindAsync(FinderMessageLog finder, CancellationToken cancellationToken = default);
+    Task PublishAsync(TMessageLog message, CancellationToken cancellationToken = default);
 }

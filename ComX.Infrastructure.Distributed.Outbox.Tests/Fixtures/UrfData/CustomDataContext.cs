@@ -10,7 +10,7 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            new IntegrationMessageLogMap()
+            new IntegrationMessageLogMap("IntegrationMessageLogs")
                 .Configure(modelBuilder.Entity<IntegrationMessageLog>());
             
             base.OnModelCreating(modelBuilder);

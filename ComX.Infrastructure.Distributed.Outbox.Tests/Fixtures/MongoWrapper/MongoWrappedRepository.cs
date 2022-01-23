@@ -4,15 +4,15 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace ComX.Infrastructure.Distributed.Outbox.Tests;
-public class MongoWrappedRepository : IOutboxRepository
+public class MongoWrappedRepository : IOutboxRepository<IntegrationMessageLog>
 {
-    private readonly OutboxMongoRepository<MyMongoOutboxDocument> _innerRepository;
+    private readonly OutboxMongoRepository<MyMongoOutboxDocument,IntegrationMessageLog> _innerRepository;
 
     public MongoWrappedRepository(
         IOutboxMongoSettings outboxMongoSettings,
         OutboxMongoManager mongoManager)
     {
-        _innerRepository = new OutboxMongoRepository<MyMongoOutboxDocument>(
+        _innerRepository = new OutboxMongoRepository<MyMongoOutboxDocument, IntegrationMessageLog>(
             mongoManager.GetCollection<MyMongoOutboxDocument>(outboxMongoSettings.DbName, outboxMongoSettings.ConnectionString),
             MyMongoOutboxDocument.ToMongoIntegrationMessageLog,
             MyMongoOutboxDocument.ToIntegrationMessageLog);

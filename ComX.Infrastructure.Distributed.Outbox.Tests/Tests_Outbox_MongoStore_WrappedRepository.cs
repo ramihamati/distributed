@@ -44,7 +44,7 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
 
             serviceCollection.AddOutboxService(cfg =>
             {
-                cfg.RegisterEvents(reg =>
+                cfg.ConfigureEvents(reg =>
                 {
                     reg.RegisterMessage<IEventOne>(EVENT_ONE_NAME);
                     reg.RegisterMessage<IEventTwo>(EVENT_TWO_NAME);
@@ -54,7 +54,7 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
                 {
                     storeCfg.UseMongoStore(configuration, mCfg =>
                     {
-                        mCfg.UseRepository<MongoWrappedRepository>();
+                        mCfg.UseRepository<MongoWrappedRepository, IntegrationMessageLog>();
                     });
                 });
                 cfg.ConfigureSerializer(sCfg => sCfg.UseMassTransitSerializer());
@@ -72,8 +72,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task Repository_Insert_ShouldWork()
         {
-            IOutboxRepository repository
-                = Services.GetService<IOutboxRepository>();
+            IOutboxRepository<IntegrationMessageLog> repository
+                = Services.GetService<IOutboxRepository<IntegrationMessageLog>>();
 
             await repository.InsertAsync(new IntegrationMessageLog
             {
@@ -98,10 +98,10 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_Save_ShouldWork()
         {
-            IOutboxStorage outboxStorage
-                = Services.GetService<IOutboxStorage>();
-            IOutboxRepository repository
-               = Services.GetService<IOutboxRepository>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+                = Services.GetService<IOutboxStorage<IntegrationMessageLog>>();
+            IOutboxRepository<IntegrationMessageLog> repository
+               = Services.GetService<IOutboxRepository<IntegrationMessageLog>>();
 
             await outboxStorage.InsertAsync(new IntegrationMessageLog
             {
@@ -126,10 +126,10 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_Update_ShouldWork()
         {
-            IOutboxStorage outboxStorage
-               = Services.GetService<IOutboxStorage>();
-            IOutboxRepository repository
-                  = Services.GetService<IOutboxRepository>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+               = Services.GetService<IOutboxStorage<IntegrationMessageLog>>();
+            IOutboxRepository<IntegrationMessageLog> repository
+                  = Services.GetService<IOutboxRepository<IntegrationMessageLog>>();
 
             Guid messageId = Guid.NewGuid();
 
@@ -162,10 +162,10 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_Delete_ShouldWork()
         {
-            IOutboxStorage outboxStorage
-               = Services.GetService<IOutboxStorage>();
-            IOutboxRepository repository
-                  = Services.GetService<IOutboxRepository>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+               = Services.GetService<IOutboxStorage<IntegrationMessageLog>>();
+            IOutboxRepository<IntegrationMessageLog> repository
+                  = Services.GetService<IOutboxRepository<IntegrationMessageLog>>();
 
             Guid messageId = Guid.NewGuid();
 
@@ -196,10 +196,10 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_Find_ShouldWork()
         {
-            IOutboxStorage outboxStorage
-               = Services.GetService<IOutboxStorage>();
-            IOutboxRepository repository
-                = Services.GetService<IOutboxRepository>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+               = Services.GetService<IOutboxStorage<IntegrationMessageLog>>();
+            IOutboxRepository<IntegrationMessageLog> repository
+                = Services.GetService<IOutboxRepository<IntegrationMessageLog>>();
 
             Guid messageId = Guid.NewGuid();
 
@@ -225,8 +225,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_GetBatch_ShouldReturn_BatchSize_InDateOrder()
         {
-            IOutboxStorage outboxStorage
-                 = Services.GetService<IOutboxStorage>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+                 = Services.GetService<IOutboxStorage<IntegrationMessageLog>>();
 
             static IntegrationMessageLog createMessage(Guid id, string name) => new()
             {
@@ -281,8 +281,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         {
             IOutboxService outboxService
                 = Services.GetService<IOutboxService>();
-            IOutboxRepository repository
-                = Services.GetService<IOutboxRepository>();
+            IOutboxRepository<IntegrationMessageLog> repository
+                = Services.GetService<IOutboxRepository<IntegrationMessageLog>>();
             IEventSerializer eventSerializer
               = Services.GetService<IEventSerializer>();
 

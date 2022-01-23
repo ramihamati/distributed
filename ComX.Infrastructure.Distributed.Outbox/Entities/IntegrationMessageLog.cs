@@ -1,8 +1,7 @@
-﻿using System;
-
+﻿
 namespace ComX.Infrastructure.Distributed.Outbox;
 
-public class IntegrationMessageLog
+public class IntegrationMessageLog : IIntegrationMessageLog
 {
     public Guid Id { get; set; }
     public string MessageBody { get; set; }

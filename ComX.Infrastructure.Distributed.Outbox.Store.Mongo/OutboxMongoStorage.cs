@@ -1,15 +1,16 @@
 ﻿namespace ComX.Infrastructure.Distributed.Outbox;
 
-public class OutboxMongoStorage : IOutboxStorage
+public class OutboxMongoStorage<TMessageLog> : IOutboxStorage<TMessageLog>
+    where TMessageLog : class, IIntegrationMessageLog
 {
-    private readonly IOutboxRepository _repository;
+    private readonly IOutboxRepository<TMessageLog> _repository;
 
-    public OutboxMongoStorage(IOutboxRepository outboxRepository)
+    public OutboxMongoStorage(IOutboxRepository<TMessageLog> outboxRepository)
     {
         _repository = outboxRepository;
     }
 
-    public Task DeleteAsync(IntegrationMessageLog item, CancellationToken cancellationToken = default)
+    public Task DeleteAsync(TMessageLog item, CancellationToken cancellationToken = default)
     {
         return _repository.DeleteAsync(item, cancellationToken);
     }
@@ -19,22 +20,22 @@ public class OutboxMongoStorage : IOutboxStorage
         return _repository.ExistsAsync(id, cancellationToken);
     }
 
-    public Task<IntegrationMessageLog> FindAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<TMessageLog> FindAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return _repository.FindAsync(id, cancellationToken);
     }
 
-    public Task<List<IntegrationMessageLog>> FindAsync(FinderMessageLog finder, CancellationToken cancellationToken = default)
+    public Task<List<TMessageLog>> FindAsync(FinderMessageLog finder, CancellationToken cancellationToken = default)
     {
         return _repository.FindAsync(finder, cancellationToken);
     }
 
-    public Task InsertAsync(IntegrationMessageLog item, CancellationToken cancellationToken = default)
+    public Task InsertAsync(TMessageLog item, CancellationToken cancellationToken = default)
     {
         return _repository.InsertAsync(item, cancellationToken);
     }
 
-    public async Task<bool> LockAsync(IntegrationMessageLog entity, TimeSpan span)
+    public async Task<bool> LockAsync(TMessageLog entity, TimeSpan span)
     {
         try
         {
@@ -48,7 +49,7 @@ public class OutboxMongoStorage : IOutboxStorage
         }
     }
 
-    public async Task<bool> UnlockAsync(IntegrationMessageLog entity)
+    public async Task<bool> UnlockAsync(TMessageLog entity)
     {
         try
         {
@@ -62,7 +63,7 @@ public class OutboxMongoStorage : IOutboxStorage
         }
     }
 
-    public Task UpdateAsync(IntegrationMessageLog item, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(TMessageLog item, CancellationToken cancellationToken = default)
     {
         return _repository.UpdateAsync(item, cancellationToken);
     }

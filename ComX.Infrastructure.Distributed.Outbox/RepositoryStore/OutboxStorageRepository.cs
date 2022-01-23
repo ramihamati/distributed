@@ -2,17 +2,26 @@
 
 namespace ComX.Infrastructure.Distributed.Outbox;
 
-public class OutboxStorageRepository : IOutboxStorage
+/// <summary>
+/// Storage when using an external custom IOuboxRepository.
+/// No requirements regarding the persistance layer are required, user handles providing an implementation for
+/// the <see cref="IOutboxRepository{TMessage}"/>.
+/// 
+/// Note that the worker requires a repository that will perform actual changes on update. E.G. Unit Of Work being called
+/// on each RUD methods in <see cref="IOutboxRepository{TMessage}"/>
+/// </summary>
+public class OutboxStorageRepository<TMessage> : IOutboxStorage<TMessage>
+    where TMessage : class, IIntegrationMessageLog
 {
-    private readonly IOutboxRepository _repository;
+    private readonly IOutboxRepository<TMessage> _repository;
 
     public OutboxStorageRepository(
-        IOutboxRepository repository)
+        IOutboxRepository<TMessage> repository)
     {
         _repository = repository;
     }
 
-    public async Task DeleteAsync(IntegrationMessageLog item, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(TMessage item, CancellationToken cancellationToken = default)
     {
         await _repository.DeleteAsync(item, cancellationToken);
     }
@@ -22,29 +31,29 @@ public class OutboxStorageRepository : IOutboxStorage
         return _repository.ExistsAsync(id, cancellationToken);
     }
 
-    public Task<IntegrationMessageLog> FindAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<TMessage> FindAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return _repository.FindAsync(id, cancellationToken);
     }
 
-    public async Task InsertAsync(IntegrationMessageLog item, CancellationToken cancellationToken = default)
+    public async Task InsertAsync(TMessage item, CancellationToken cancellationToken = default)
     {
         await _repository.InsertAsync(item, cancellationToken);
     }
 
-    public async Task UpdateAsync(IntegrationMessageLog item, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(TMessage item, CancellationToken cancellationToken = default)
     {
         await _repository.UpdateAsync(item, cancellationToken);
     }
 
-    public Task<List<IntegrationMessageLog>> FindAsync(
+    public Task<List<TMessage>> FindAsync(
         FinderMessageLog finder,
         CancellationToken cancellationToken = default)
     {
         return _repository.FindAsync(finder, cancellationToken);
     }
 
-    public async Task<bool> LockAsync(IntegrationMessageLog entity, TimeSpan span)
+    public async Task<bool> LockAsync(TMessage entity, TimeSpan span)
     {
         try
         {
@@ -58,7 +67,7 @@ public class OutboxStorageRepository : IOutboxStorage
         }
     }
 
-    public async Task<bool> UnlockAsync(IntegrationMessageLog entity)
+    public async Task<bool> UnlockAsync(TMessage entity)
     {
         try
         {

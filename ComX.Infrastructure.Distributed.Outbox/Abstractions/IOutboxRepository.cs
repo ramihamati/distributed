@@ -1,13 +1,14 @@
 ﻿namespace ComX.Infrastructure.Distributed.Outbox;
 
-public interface IOutboxRepository
+public interface IOutboxRepository<TMessage>
+    where TMessage : class, IIntegrationMessageLog
 {
-    Task DeleteAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default);
+    Task DeleteAsync(TMessage entity, CancellationToken cancellationToken = default);
     Task<bool> ExistsAsync(Guid entityId, CancellationToken cancellationToken = default);
-    Task<IntegrationMessageLog> FindAsync(Guid entityId, CancellationToken cancellationToken = default);
-    Task InsertAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default);
-    Task UpdateAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default);
-    Task<List<IntegrationMessageLog>> FindAsync(
+    Task<TMessage> FindAsync(Guid entityId, CancellationToken cancellationToken = default);
+    Task InsertAsync(TMessage entity, CancellationToken cancellationToken = default);
+    Task UpdateAsync(TMessage entity, CancellationToken cancellationToken = default);
+    Task<List<TMessage>> FindAsync(
         FinderMessageLog findOptions,
         CancellationToken cancellationToken = default);
 }

@@ -77,7 +77,7 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
 
                 scfg.Configure(cfg =>
                 {
-                    cfg.RegisterEvents(reg =>
+                    cfg.ConfigureEvents(reg =>
                     {
                         reg.RegisterMessage<IEventOne>(EVENT_ONE_NAME);
                         reg.RegisterMessage<IEventTwo>(EVENT_TWO_NAME);
@@ -147,8 +147,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_Save_ShouldWork()
         {
-            IOutboxStorage outboxStorage
-                = OutboxContainer.ServiceProvider.GetService<IOutboxStorage>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+                = OutboxContainer.ServiceProvider.GetService<IOutboxStorage<IntegrationMessageLog>>();
             IRepository<IntegrationMessageLog> repository
                = OutboxContainer.ServiceProvider.GetService<IRepository<IntegrationMessageLog>>();
             IUnitOfWork externalUOW
@@ -179,8 +179,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_Update_ShouldWork()
         {
-            IOutboxStorage outboxStorage
-               = OutboxContainer.ServiceProvider.GetService<IOutboxStorage>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+               = OutboxContainer.ServiceProvider.GetService<IOutboxStorage<IntegrationMessageLog>>();
             IRepository<IntegrationMessageLog> repository
                = OutboxContainer.ServiceProvider.GetService<IRepository<IntegrationMessageLog>>();
             IUnitOfWork externalUOW
@@ -219,8 +219,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_Delete_ShouldWork()
         {
-            IOutboxStorage outboxStorage
-               = OutboxContainer.ServiceProvider.GetService<IOutboxStorage>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+               = OutboxContainer.ServiceProvider.GetService<IOutboxStorage<IntegrationMessageLog>>();
             IRepository<IntegrationMessageLog> repository
                = OutboxContainer.ServiceProvider.GetService<IRepository<IntegrationMessageLog>>();
             IUnitOfWork externalUOW
@@ -256,8 +256,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_Find_ShouldWork()
         {
-            IOutboxStorage outboxStorage
-               = OutboxContainer.ServiceProvider.GetService<IOutboxStorage>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+               = OutboxContainer.ServiceProvider.GetService<IOutboxStorage<IntegrationMessageLog>>();
             IRepository<IntegrationMessageLog> repository
                = OutboxContainer.ServiceProvider.GetService<IRepository<IntegrationMessageLog>>();
             IUnitOfWork externalUOW
@@ -286,8 +286,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
         [Test]
         public async Task OutboxStorage_GetBatch_ShouldReturn_BatchSize_InDateOrder()
         {
-            IOutboxStorage outboxStorage
-                 = OutboxContainer.ServiceProvider.GetService<IOutboxStorage>();
+            IOutboxStorage<IntegrationMessageLog> outboxStorage
+                 = OutboxContainer.ServiceProvider.GetService<IOutboxStorage<IntegrationMessageLog>>();
             IUnitOfWork externalUOW
                = ServiceProvider.GetService<IUnitOfWork>();
 

@@ -5,8 +5,8 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests;
 public static class ExtensionsTests
 {
     public static void UseTestPublisher(
-      this IConfiguratorPublisher brokerConfigurator)
+      this IConfiguratorWorkerPublisher brokerConfigurator)
     {
-        brokerConfigurator.Context.Services.TryAddScoped<IOutboxBrokerPublisher, TestPublisher>();
+        brokerConfigurator.Context.ContainerServices.TryAddScoped<IOutboxBrokerPublisher, TestPublisher>();
     }
 }

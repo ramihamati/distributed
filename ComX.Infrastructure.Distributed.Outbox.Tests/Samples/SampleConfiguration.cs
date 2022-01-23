@@ -22,7 +22,7 @@ public class SampleStartup
 
         services.AddOutboxWorker<TestConfigurationOutboxWorker>(cfg =>
         {
-            cfg.RegisterEvents(reg =>
+            cfg.ConfigureEvents(reg =>
             {
                 reg.RegisterMessage<IEventOne>("IEventDocumentStored");
                 reg.RegisterMessage<IEventTwo>("IEventPersistDocumentsCompleted");
@@ -55,7 +55,7 @@ public class SampleStartup
 
         services.AddOutboxWorker<TestConfigurationOutboxWorker>(cfg =>
         {
-            cfg.RegisterEvents(reg =>
+            cfg.ConfigureEvents(reg =>
             {
                 reg.RegisterMessage<IEventOne>("IEventDocumentStored");
                 reg.RegisterMessage<IEventTwo>("IEventPersistDocumentsCompleted");
@@ -83,7 +83,7 @@ public class SampleStartup
 
         services.AddOutboxService(cfg =>
         {
-            cfg.RegisterEvents(reg =>
+            cfg.ConfigureEvents(reg =>
             {
                 reg.RegisterMessage<IEventOne>("IEventDocumentStored");
                 reg.RegisterMessage<IEventTwo>("IEventPersistDocumentsCompleted");
@@ -107,7 +107,7 @@ public class SampleStartup
 
         services.AddOutboxService(cfg =>
         {
-            cfg.RegisterEvents(reg =>
+            cfg.ConfigureEvents(reg =>
             {
                 reg.RegisterMessage<IEventOne>("IEventDocumentStored");
                 reg.RegisterMessage<IEventTwo>("IEventPersistDocumentsCompleted");
@@ -135,7 +135,7 @@ public class SampleStartup
 
         services.AddOutboxService(cfg =>
         {
-            cfg.RegisterEvents(reg =>
+            cfg.ConfigureEvents(reg =>
             {
                 reg.RegisterMessage<IEventOne>("IEventDocumentStored");
                 reg.RegisterMessage<IEventTwo>("IEventPersistDocumentsCompleted");
@@ -160,7 +160,7 @@ public class SampleStartup
         IServiceCollection services = new ServiceCollection();
         services.AddOutboxService(cfg =>
         {
-            cfg.RegisterEvents(reg =>
+            cfg.ConfigureEvents(reg =>
             {
                 reg.RegisterMessage<IEventOne>("IEventDocumentStored");
                 reg.RegisterMessage<IEventTwo>("IEventPersistDocumentsCompleted");
@@ -200,7 +200,7 @@ public class SampleStartup
 
         services.AddOutboxService(cfg =>
         {
-            cfg.RegisterEvents(reg =>
+            cfg.ConfigureEvents(reg =>
             {
                 reg.RegisterMessage<IEventOne>("IEventDocumentStored");
                 reg.RegisterMessage<IEventTwo>("IEventPersistDocumentsCompleted");

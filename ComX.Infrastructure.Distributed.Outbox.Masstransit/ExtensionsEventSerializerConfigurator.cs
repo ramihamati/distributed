@@ -10,5 +10,10 @@ public static class ExtensionsEventSerializerConfigurator
     {
         serializerConfigurator.Context.Services.TryAddScoped<IEventSerializer, EventSerializer>();
     }
-}
 
+    public static void UseMassTransitSerializer(
+        this IConfiguratorWorkerEventSerializer serializerConfigurator)
+    {
+        serializerConfigurator.Context.ContainerServices.TryAddScoped<IEventSerializer, EventSerializer>();
+    }
+}

@@ -1,5 +1,4 @@
 ﻿using ComX.Infrastructure.Distributed.Outbox;
-using ComX.Infrastructure.Distributed.Outbox.Masstransit;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
@@ -40,7 +39,7 @@ public static class ExtensionsOutboxService
         services.TryAddScoped<IOutboxService>(sp =>
         {
             return new OutboxService(
-                    sp.GetRequiredService<IOutboxStorage>(),
+                    sp,
                     sp.GetService<ILoggerFactory>()?.CreateLogger<OutboxService>(),
                     sp.GetRequiredService<IOutboxServiceRegistry>(),
                     sp.GetRequiredService<IEventSerializer>()
@@ -68,13 +67,13 @@ public static class ExtensionsOutboxService
 present in ComX.Infrastructure.Distributed.Outbox.Masstransit");
         }
 
-        Type typeStorage = typeof(IOutboxStorage);
-        bool hasStorage = services.Any(r => r.ServiceType.Equals(typeStorage));
-        if (!hasStorage)
-        {
-            throw new Exception(@$"You must register a store service. Use the method 
-{nameof(ConfiguratorOutboxService)}.{nameof(ConfiguratorOutboxService.ConfigureStore)}. A store is
-present in ComX.Infrastructure.Distributed.Outbox.Store.Sql");
-        }
+//        Type typeStorage = typeof(IOutboxStorage);
+//        bool hasStorage = services.Any(r => r.ServiceType.Equals(typeStorage));
+//        if (!hasStorage)
+//        {
+//            throw new Exception(@$"You must register a store service. Use the method 
+//{nameof(ConfiguratorOutboxService)}.{nameof(ConfiguratorOutboxService.ConfigureStore)}. A store is
+//present in ComX.Infrastructure.Distributed.Outbox.Store.Sql");
+//        }
     }
 }

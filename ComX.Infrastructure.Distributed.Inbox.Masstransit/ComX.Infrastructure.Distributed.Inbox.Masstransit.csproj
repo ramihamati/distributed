@@ -14,6 +14,7 @@
         <IsPackable>true</IsPackable>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="ComX.Common.MassTransitCommon" Version="1.3.220107.5" />
         <PackageReference Include="MassTransit.AspNetCore" Version="7.3.0" />
     </ItemGroup>
     <ItemGroup>

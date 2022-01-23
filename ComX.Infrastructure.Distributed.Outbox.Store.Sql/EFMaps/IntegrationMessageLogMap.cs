@@ -3,11 +3,27 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ComX.Infrastructure.Distributed.Outbox
 {
-    public  class IntegrationMessageLogMap : IEntityTypeConfiguration<IntegrationMessageLog>
+    public class IntegrationMessageLogMap: IntegrationMessageLogMap<IntegrationMessageLog>
     {
-        public void Configure(EntityTypeBuilder<IntegrationMessageLog> builder)
+        public IntegrationMessageLogMap(string tableName) : base(tableName)
         {
-            builder.ToTable("IntegrationMessageLogs");
+        }
+
+    }
+
+    public  class IntegrationMessageLogMap<TMessageLog> : IEntityTypeConfiguration<TMessageLog>
+        where TMessageLog : class, IIntegrationMessageLog
+    {
+        private readonly string _tableName;
+
+        public IntegrationMessageLogMap(string tableName)
+        {
+            this._tableName = tableName;
+        }
+
+        public void Configure(EntityTypeBuilder<TMessageLog> builder)
+        {
+            builder.ToTable(_tableName);
 
             //Primary Key
             builder.HasKey(t => t.Id);

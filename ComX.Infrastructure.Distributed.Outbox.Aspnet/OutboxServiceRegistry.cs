@@ -1,36 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ComX.Infrastructure.Distributed.Outbox
+namespace ComX.Infrastructure.Distributed.Outbox;
+
+internal class OutboxServiceRegistry : IOutboxServiceRegistry
 {
-    internal class OutboxServiceRegistry :  IOutboxServiceRegistry
+    private List<RegistryMessageInfo> MessageInfos { get; }
+
+    public OutboxServiceRegistry(List<RegistryMessageInfo> messages)
     {
-        #region [ Fields ]
-        private List<RegistryMessageInfo> MessageInfos { get; }
-        #endregion
+        MessageInfos = messages ?? new List<RegistryMessageInfo>();
+    }
 
-        #region [ Properties ]
+    public RegistryMessageInfo GetInfoFor<TMessage>()
+    {
+        Type type = typeof(TMessage);
+        return MessageInfos.Find(r => r.MessageType.Equals(type));
+    }
 
-        #endregion
-
-        #region [ Constructor ]
-        public OutboxServiceRegistry(List<RegistryMessageInfo> messages)
-        {
-            MessageInfos = messages ?? new List<RegistryMessageInfo>();
-        }
-        #endregion
-
-        #region [ Methods ]
-        public RegistryMessageInfo GetInfoFor<TMessage>()
-        {
-            Type type = typeof(TMessage);
-            return MessageInfos.Find(r => r.MessageType.Equals(type));
-        }
-
-        public RegistryMessageInfo GetInfoFor(string name)
-        {
-            return MessageInfos.Find(r => r.Name.Equals(name));
-        } 
-        #endregion
+    public RegistryMessageInfo GetInfoFor(string name)
+    {
+        return MessageInfos.Find(r => r.Name.Equals(name));
     }
 }

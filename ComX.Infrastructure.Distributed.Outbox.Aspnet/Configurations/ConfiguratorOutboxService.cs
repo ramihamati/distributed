@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
+using System.Linq;
 
-namespace ComX.Infrastructure.Distributed.Outbox.Masstransit;
+namespace ComX.Infrastructure.Distributed.Outbox;
 
 public sealed class ConfiguratorOutboxService
 {
@@ -18,7 +19,35 @@ public sealed class ConfiguratorOutboxService
 
     }
 
-    public ConfiguratorOutboxService RegisterEvents(Action<IOutboxServiceRegistryBuilder> registryBuilder)
+    public ConfiguratorOutboxService ConfigureTransforms(Action<ITransformerServiceConfigurator> configurator)
+    {
+        TransformerServiceConfigurator serviceConfigurator = new(Context);
+        configurator(serviceConfigurator);
+        // if no transformer is added
+
+        bool hasTransformer =
+            Context.Services.Any(r => r.ServiceType == typeof(IOutboxTransformer));
+
+        if (!hasTransformer && serviceConfigurator.Transforms.Count > 0)
+        {
+            throw new Exception("Detected registered transform requirements but no transformer. You can use UseAutoMapperTransform()");
+        }
+
+        Context.Services.AddScoped<IOutboxTransformerService, TransformerService>(sp =>
+        {
+            return ActivatorUtilities.CreateInstance<TransformerService>(sp, new object[]
+            {
+                serviceConfigurator.Transforms
+            });
+        });
+
+        // if no transformer is added, and no transforms registered so no exception is thrown
+        // then we add a Noop one which is not used, but required bu the ITransformerService in the ctor
+        Context.Services.TryAddScoped<IOutboxTransformer, NoopTransformer>();
+        return this;
+    }
+
+    public ConfiguratorOutboxService ConfigureEvents(Action<IOutboxServiceRegistryBuilder> registryBuilder)
     {
         if (EventsRegisteredOnce)
         {
@@ -62,7 +91,7 @@ public sealed class ConfiguratorOutboxService
         if (!EventsRegisteredOnce)
         {
             throw new Exception(@$"No events are registered for the outbox. 
-Did you use the method {nameof(ConfiguratorOutboxService)}.{nameof(RegisterEvents)}(...)?");
+Did you use the method {nameof(ConfiguratorOutboxService)}.{nameof(ConfigureEvents)}(...)?");
         }
 
         if (!StoreConfiguredOnce)

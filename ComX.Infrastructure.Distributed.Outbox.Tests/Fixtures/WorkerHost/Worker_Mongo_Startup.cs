@@ -31,7 +31,7 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IConfigurationOutboxWorker>(
+            services.AddScoped<TestConfigurationOutboxWorker>(
                            _ => new TestConfigurationOutboxWorker(_workerPeriod, _timeBetweenRetries));
             services.AddLogging();
 
@@ -39,11 +39,9 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
             // in real scenarios you must UseMassTransitPublisher() and add the MassTransit broker:
             //services.AddMassTransit(cfg =>{})
 
-            services.AddScoped<IOutboxBrokerPublisher>(_ => _outboxBrokerPublisher);
-
             services.AddOutboxWorker<TestConfigurationOutboxWorker>(cfg =>
             {
-                cfg.RegisterEvents(reg =>
+                cfg.ConfigureEvents(reg =>
                 {
                     reg.RegisterMessage<IEventOne>(EVENT_ONE_NAME);
                     reg.RegisterMessage<IEventTwo>(EVENT_TWO_NAME);
@@ -57,7 +55,12 @@ namespace ComX.Infrastructure.Distributed.Outbox.Tests
                         mCfg.UseBuiltInRepository();
                     });
                 });
-
+                cfg.ConfigurePublisher(pubCfg =>
+                {
+                    // pubCfg.Context.Services are isolated services
+                    pubCfg.Context.ContainerServices.AddScoped<IOutboxBrokerPublisher>(_ => _outboxBrokerPublisher);
+                    //pubCfg.UseMassTransitPublisher();
+                });
                 //cfg.ConfigurePublisher(pubCfg => pubCfg.UseMassTransitPublisher());
                 cfg.ConfigureSerializer(ser => ser.UseMassTransitSerializer());
             });

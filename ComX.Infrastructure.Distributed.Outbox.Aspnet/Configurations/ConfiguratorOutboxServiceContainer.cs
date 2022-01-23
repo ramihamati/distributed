@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 
-namespace ComX.Infrastructure.Distributed.Outbox.Masstransit;
+namespace ComX.Infrastructure.Distributed.Outbox;
 
 public sealed class ConfiguratorOutboxServiceContainer
 {

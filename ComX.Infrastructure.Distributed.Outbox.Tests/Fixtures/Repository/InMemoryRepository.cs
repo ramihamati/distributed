@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ComX.Infrastructure.Distributed.Outbox.Tests;
 
-public class InMemoryRepository : IOutboxRepository
+public class InMemoryRepository : IOutboxRepository<IntegrationMessageLog>
 {
     private List<IntegrationMessageLog> _storage = new();
 

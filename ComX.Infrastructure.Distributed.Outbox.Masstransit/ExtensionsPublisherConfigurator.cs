@@ -6,15 +6,15 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class ExtensionsPublisherConfigurator
 {
     public static void UseMassTransitPublisher(
-        this IConfiguratorPublisher brokerConfigurator)
+        this IConfiguratorWorkerPublisher brokerConfigurator)
     {
-        brokerConfigurator.Context.Services.TryAddScoped<IOutboxBrokerPublisher, OutboxMassTransitPublisher>();
+        brokerConfigurator.Context.ContainerServices.TryAddScoped<IOutboxBrokerPublisher, OutboxMassTransitPublisher>();
     }
 
     public static void UseMassTransitMediatorPublisher(
-        this IConfiguratorPublisher brokerConfigurator)
+        this IConfiguratorWorkerPublisher brokerConfigurator)
     {
-        brokerConfigurator.Context.Services.TryAddScoped<IOutboxBrokerPublisher, OutboxMassTransitMediatorPublisher>();
+        brokerConfigurator.Context.ContainerServices.TryAddScoped<IOutboxBrokerPublisher, OutboxMassTransitMediatorPublisher>();
     }
 }
 

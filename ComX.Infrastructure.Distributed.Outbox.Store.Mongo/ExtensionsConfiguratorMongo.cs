@@ -16,7 +16,7 @@ public static class ExtensionsConfiguratorMongo
 
         services.TryAddScoped<IOutboxMongoSettings, TConfiguration>();
 
-        AddMongoStoreBasics(storeConfigurator, services);
+        AddMongoStoreBasics(storeConfigurator, configurator.Context);
     }
 
     public static void UseMongoStore<TConfiguration>(
@@ -28,7 +28,7 @@ public static class ExtensionsConfiguratorMongo
         IServiceCollection services = configurator.Context.Services
             ?? throw new NullReferenceException("The context does not have the services collection");
         services.TryAddScoped<IOutboxMongoSettings>(_ => configuration);
-        AddMongoStoreBasics(storeConfigurator, services);
+        AddMongoStoreBasics(storeConfigurator, configurator.Context);
     }
 
     public static void UseMongoStore<TConfiguration>(
@@ -40,28 +40,14 @@ public static class ExtensionsConfiguratorMongo
         IServiceCollection services = configurator.Context.Services
             ?? throw new NullReferenceException("The context does not have the services collection");
         services.TryAddScoped(configurationFactory);
-        AddMongoStoreBasics(storeConfigurator, services);
+        AddMongoStoreBasics(storeConfigurator, configurator.Context);
     }
 
-    private static void AddMongoStoreBasics(Action<ConfiguratorMongoStore> storeConfigurator, IServiceCollection services)
+    private static void AddMongoStoreBasics(Action<ConfiguratorMongoStore> storeConfigurator, ConfiguratorContext context)
     {
-        Type outboxStorageType = typeof(IOutboxStorage);
+        context.Services.AddScoped<OutboxMongoManager>();
 
-        if (services.Any(r => r.ServiceType.Equals(outboxStorageType)))
-        {
-            throw new InvalidOperationException("The store was already added");
-        }
-
-        services.AddScoped<IOutboxStorage, OutboxMongoStorage>();
-        services.AddScoped<OutboxMongoManager>();
-
-        ConfiguratorMongoStore storeConfiguratorModel = new(services);
+        ConfiguratorMongoStore storeConfiguratorModel = new(context);
         storeConfigurator(storeConfiguratorModel);
-
-        if (!storeConfiguratorModel.ConnectionInitializedOnce)
-        {
-            throw new Exception(@"You are using mongo store for the outbox but not 
-repository type was configured.");
-        }
     }
 }

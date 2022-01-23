@@ -2,30 +2,36 @@
 
 namespace ComX.Infrastructure.Distributed.Outbox;
 
-public class OutboxMongoRepository<TEntity> : IOutboxRepository
-    where TEntity : IMongoOutboxDocument
+/// <summary>
+/// Builtin repository for <typeparamref name="TMessageLog"/>. It converts it into the mongo entity <typeparamref name="TMongoMessageLog"/>
+/// </summary>
+/// <typeparam name="TMongoMessageLog">mongo entity converted from TMessageLog</typeparam>
+/// <typeparam name="TMessageLog">oritinal repository entity</typeparam>
+public class OutboxMongoRepository<TMongoMessageLog, TMessageLog> : IOutboxRepository<TMessageLog>
+    where TMessageLog : class, IIntegrationMessageLog
+    where TMongoMessageLog : IMongoOutboxDocument
 {
-    private readonly IMongoCollection<TEntity> _collection;
-    private readonly Func<IntegrationMessageLog, TEntity> _toEntity;
-    private readonly Func<TEntity, IntegrationMessageLog> _fromEntity;
+    private readonly IMongoCollection<TMongoMessageLog> _collection;
+    private readonly Func<TMessageLog, TMongoMessageLog> _toEntity;
+    private readonly Func<TMongoMessageLog, TMessageLog> _fromEntity;
 
     public OutboxMongoRepository(
-        IMongoCollection<TEntity> collection,
-        Func<IntegrationMessageLog, TEntity> toEntity,
-        Func<TEntity, IntegrationMessageLog> fromEntity)
+        IMongoCollection<TMongoMessageLog> collection,
+        Func<TMessageLog, TMongoMessageLog> toEntity,
+        Func<TMongoMessageLog, TMessageLog> fromEntity)
     {
         _collection = collection;
         _toEntity = toEntity;
         _fromEntity = fromEntity;
     }
 
-    public async Task DeleteAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(TMessageLog entity, CancellationToken cancellationToken = default)
     {
-        TEntity mongoEntity = _toEntity(entity);
+        TMongoMessageLog mongoEntity = _toEntity(entity);
 
-        FilterDefinition<TEntity> filter =
-                     Builders<TEntity>.Filter.Eq(t => t.Id, mongoEntity.Id)
-                   & Builders<TEntity>.Filter.Eq(t => t.Timestamp, mongoEntity.Timestamp);
+        FilterDefinition<TMongoMessageLog> filter =
+                     Builders<TMongoMessageLog>.Filter.Eq(t => t.Id, mongoEntity.Id)
+                   & Builders<TMongoMessageLog>.Filter.Eq(t => t.Timestamp, mongoEntity.Timestamp);
 
         DeleteResult result = await _collection.DeleteOneAsync(filter, cancellationToken: cancellationToken);
 
@@ -50,9 +56,9 @@ public class OutboxMongoRepository<TEntity> : IOutboxRepository
         Guid entityId,
         CancellationToken cancellationToken = default)
     {
-        IAsyncCursor<TEntity> entity = await _collection.FindAsync(
-            Builders<TEntity>.Filter.Eq(r => r.Id, entityId),
-            new FindOptions<TEntity>
+        IAsyncCursor<TMongoMessageLog> entity = await _collection.FindAsync(
+            Builders<TMongoMessageLog>.Filter.Eq(r => r.Id, entityId),
+            new FindOptions<TMongoMessageLog>
             {
                 Limit = 1
             }, cancellationToken);
@@ -62,13 +68,13 @@ public class OutboxMongoRepository<TEntity> : IOutboxRepository
             .Any();
     }
 
-    public async Task<IntegrationMessageLog> FindAsync(
+    public async Task<TMessageLog> FindAsync(
         Guid entityId,
         CancellationToken cancellationToken = default)
     {
-        IAsyncCursor<TEntity> entityResponse = await _collection.FindAsync(
-            Builders<TEntity>.Filter.Eq(r => r.Id, entityId),
-            new FindOptions<TEntity>
+        IAsyncCursor<TMongoMessageLog> entityResponse = await _collection.FindAsync(
+            Builders<TMongoMessageLog>.Filter.Eq(r => r.Id, entityId),
+            new FindOptions<TMongoMessageLog>
             {
                 Limit = 1
             }, cancellationToken);
@@ -80,20 +86,20 @@ public class OutboxMongoRepository<TEntity> : IOutboxRepository
         return entity is null ? null : _fromEntity(entity);
     }
 
-    public async Task<List<IntegrationMessageLog>> FindAsync(
+    public async Task<List<TMessageLog>> FindAsync(
         FinderMessageLog finder,
         CancellationToken cancellationToken = default)
     {
-        FilterDefinition<TEntity> filter = GetFilterDefinition(finder);
-        FindOptions<TEntity> findOptions = GetFindOptions(finder);
+        FilterDefinition<TMongoMessageLog> filter = GetFilterDefinition(finder);
+        FindOptions<TMongoMessageLog> findOptions = GetFindOptions(finder);
 
-        IAsyncCursor<TEntity> entities = await _collection.FindAsync(filter, findOptions);
+        IAsyncCursor<TMongoMessageLog> entities = await _collection.FindAsync(filter, findOptions);
         return (await entities.ToListAsync(cancellationToken)).ConvertAll(r => _fromEntity(r));
     }
 
-    public async Task InsertAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default)
+    public async Task InsertAsync(TMessageLog entity, CancellationToken cancellationToken = default)
     {
-        TEntity mongoEntity = _toEntity(entity);
+        TMongoMessageLog mongoEntity = _toEntity(entity);
         mongoEntity.Id = mongoEntity.Id == Guid.Empty ? Guid.NewGuid() : mongoEntity.Id;
         mongoEntity.Timestamp = DateTime.UtcNow.Ticks;
         await _collection.InsertOneAsync(mongoEntity, cancellationToken: cancellationToken);
@@ -103,15 +109,15 @@ public class OutboxMongoRepository<TEntity> : IOutboxRepository
         entity.Id = mongoEntity.Id;
     }
 
-    public async Task UpdateAsync(IntegrationMessageLog entity, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(TMessageLog entity, CancellationToken cancellationToken = default)
     {
-        TEntity mongoEntity = _toEntity(entity);
+        TMongoMessageLog mongoEntity = _toEntity(entity);
         long currentTimestamp = mongoEntity.Timestamp;
         mongoEntity.Timestamp = DateTimeOffset.UtcNow.Ticks;
 
-        FilterDefinition<TEntity> filter =
-                     Builders<TEntity>.Filter.Eq(t => t.Id, mongoEntity.Id)
-                   & Builders<TEntity>.Filter.Eq(t => t.Timestamp, currentTimestamp);
+        FilterDefinition<TMongoMessageLog> filter =
+                     Builders<TMongoMessageLog>.Filter.Eq(t => t.Id, mongoEntity.Id)
+                   & Builders<TMongoMessageLog>.Filter.Eq(t => t.Timestamp, currentTimestamp);
 
         ReplaceOneResult result = await _collection.ReplaceOneAsync(filter, mongoEntity, cancellationToken: cancellationToken);
 
@@ -137,9 +143,9 @@ public class OutboxMongoRepository<TEntity> : IOutboxRepository
 
     #region [ Private ]
 
-    private static FindOptions<TEntity> GetFindOptions(FinderMessageLog finder)
+    private static FindOptions<TMongoMessageLog> GetFindOptions(FinderMessageLog finder)
     {
-        FindOptions<TEntity> findOptions = new();
+        FindOptions<TMongoMessageLog> findOptions = new();
 
         if (finder.Limit.HasValue)
         {
@@ -151,33 +157,33 @@ public class OutboxMongoRepository<TEntity> : IOutboxRepository
             findOptions.Skip = finder.Skip.Value;
         }
 
-        findOptions.Sort = Builders<TEntity>.Sort.Ascending(r => r.CreatedAt);
+        findOptions.Sort = Builders<TMongoMessageLog>.Sort.Ascending(r => r.CreatedAt);
 
         return findOptions;
     }
 
-    private static FilterDefinition<TEntity> GetFilterDefinition(FinderMessageLog findOptions)
+    private static FilterDefinition<TMongoMessageLog> GetFilterDefinition(FinderMessageLog findOptions)
     {
-        FilterDefinition<TEntity> filter = FilterDefinition<TEntity>.Empty;
+        FilterDefinition<TMongoMessageLog> filter = FilterDefinition<TMongoMessageLog>.Empty;
 
         if (findOptions.Filter.LastAttemptOffset.HasValue)
         {
             DateTime nextAttempt = DateTime.UtcNow - findOptions.Filter.LastAttemptOffset.Value;
-            filter &= Builders<TEntity>.Filter.Where(r => r.LastAttemptDate == null || r.LastAttemptDate < nextAttempt);
+            filter &= Builders<TMongoMessageLog>.Filter.Where(r => r.LastAttemptDate == null || r.LastAttemptDate < nextAttempt);
         }
         if (findOptions.Filter.Status.HasValue)
         {
-            filter &= Builders<TEntity>.Filter.Eq(r => r.Status, findOptions.Filter.Status.Value);
+            filter &= Builders<TMongoMessageLog>.Filter.Eq(r => r.Status, findOptions.Filter.Status.Value);
         }
 
         if (findOptions.Filter.Unlocked.HasValue)
         {
-            filter &= Builders<TEntity>.Filter.Where(r => r.LockUntil == null || r.LockUntil < DateTime.UtcNow);
+            filter &= Builders<TMongoMessageLog>.Filter.Where(r => r.LockUntil == null || r.LockUntil < DateTime.UtcNow);
         }
 
         if (findOptions.Filter.MessageTypeName.HasValue)
         {
-            filter &= Builders<TEntity>.Filter.Where(r => r.MessageTypeName == findOptions.Filter.MessageTypeName.Value);
+            filter &= Builders<TMongoMessageLog>.Filter.Where(r => r.MessageTypeName == findOptions.Filter.MessageTypeName.Value);
         }
         return filter;
     }

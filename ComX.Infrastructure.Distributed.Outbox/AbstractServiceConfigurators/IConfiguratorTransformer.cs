@@ -1,6 +1,6 @@
 ﻿namespace ComX.Infrastructure.Distributed.Outbox;
 
-public interface IConfiguratorPublisher
+public interface IConfiguratorTransformer
 {
     ConfiguratorContext Context { get; }
 }
