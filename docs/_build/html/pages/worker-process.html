@@ -72,6 +72,122 @@
 <span id="workerprocess"></span><h1>WORKER PROCESS<a class="headerlink" href="#worker-process" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<section id="about">
+<h2>About<a class="headerlink" href="#about" title="Permalink to this headline"></a></h2>
+<p>A flexible framework for creating multiple types of workers. The library is designed so that the behaviour of the worker
+is split from the action performed</p>
+</section>
+<section id="internals">
+<h2>Internals<a class="headerlink" href="#internals" title="Permalink to this headline"></a></h2>
+<p>The worker uses two main components for configuring the process:</p>
+<ul class="simple">
+<li><p><code class="code cs docutils literal notranslate"><span class="name"><span class="pre">IBackgroundProcessor</span></span></code> is used to control the behaviour of the worker.</p></li>
+</ul>
+<p>It handles how the worker is being created, destroyed and it’s used by the hosted service.
+The StartAsync() method will use the <cite>IWorkerProcess.ProcessAsync</cite> method to actually process.</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">interface</span><span class="w"> </span><span class="n">IBackgroundProcessor</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">Task</span><span class="w"> </span><span class="nf">StartAsync</span><span class="p">(</span><span class="n">Func</span><span class="p">&lt;</span><span class="n">Task</span><span class="p">&gt;</span><span class="w"> </span><span class="n">func</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">Task</span><span class="w"> </span><span class="nf">StopAsync</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">Dispose</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="code cs docutils literal notranslate"><span class="name"><span class="pre">IWorkerProcess</span></span></code> encapsulates the actual logic performed by the worker iteration</p></li>
+</ul>
+</section>
+<section id="programability-timer">
+<h2>Programability Timer<a class="headerlink" href="#programability-timer" title="Permalink to this headline"></a></h2>
+<p>The <code class="code cs docutils literal notranslate"><span class="name"><span class="pre">BackgroundTimerProcessor</span></span></code> is an implementation of the BackgroundProcessor that uses a Timer to start the process on a period basis,
+but guarantees that at no time (in the same process) multiple threads are started.
+If the thread is activelly processing and the timer has to restart, it just stores an intent of continuing the work after the active task finishes.</p>
+<p>Example:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">create a process to be run by the worker</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">MyWorkerTimerProcess</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IWorkerProcess</span><span class="w"></span>
+<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="k">public</span><span class="w"> </span><span class="n">SomeOtherService</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">     </span><span class="k">public</span><span class="w"> </span><span class="nf">MyWorkerTimerProcess</span><span class="p">(</span><span class="n">SomeOtherService</span><span class="w"> </span><span class="n">service</span><span class="p">)</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="n">Service</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">service</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="w">     </span><span class="k">public</span><span class="w"> </span><span class="n">ValueTask</span><span class="w"> </span><span class="nf">DisposeAsync</span><span class="p">()</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="n">ValueTask</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">     </span><span class="k">public</span><span class="w"> </span><span class="n">Task</span><span class="w"> </span><span class="nf">ProcessAsync</span><span class="p">()</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="n">Task</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">register the worker and it’s process</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="n">services</span><span class="p">.</span><span class="n">AddTransient</span><span class="p">&lt;</span><span class="n">SomeOtherService</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w"> </span><span class="n">services</span><span class="p">.</span><span class="n">AddWorkerProgramabilityTimer</span><span class="p">&lt;</span><span class="n">MyWorkerTimerProcess</span><span class="p">&gt;(</span><span class="k">new</span><span class="w"> </span><span class="n">Configuration</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromSeconds</span><span class="p">(</span><span class="m">100</span><span class="p">)));</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="overloads">
+<h2>Overloads<a class="headerlink" href="#overloads" title="Permalink to this headline"></a></h2>
+<p>The worker process represents the unit of processing which encapsulates the processing logic of the business, disregarding the worker behaviour.</p>
+<p><strong>Usages</strong>
+To register the worker process</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="n">services</span><span class="p">.</span><span class="n">AddWorkerProgramabilityTimer</span><span class="p">&lt;</span><span class="n">MyWorkerTimerProcess</span><span class="p">&gt;(</span><span class="k">new</span><span class="w"> </span><span class="n">Configuration</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromSeconds</span><span class="p">(</span><span class="m">100</span><span class="p">)));</span><span class="w"></span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddWorkerProgramabilityTimer</span><span class="p">&lt;</span><span class="n">MyWorkerTimerProcess</span><span class="p">&gt;((</span><span class="n">sp</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Configuration</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromSeconds</span><span class="p">(</span><span class="m">100</span><span class="p">)));</span><span class="w"></span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddWorkerProgramabilityTimer</span><span class="p">&lt;</span><span class="n">Configuration</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">MyWorkerTimerProcess</span><span class="p">&gt;();</span><span class="w"></span>
+</pre></div>
+</div>
+<p>where</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IConfigurationTimer</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">private</span><span class="w"> </span><span class="k">readonly</span><span class="w"> </span><span class="n">TimeSpan</span><span class="w"> </span><span class="n">workerPeriod</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">TimeSpan</span><span class="w"> </span><span class="n">WorkerPeriod</span><span class="w"> </span><span class="p">=&amp;</span><span class="n">gt</span><span class="p">;</span><span class="w"> </span><span class="n">workerPeriod</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="nf">Configuration</span><span class="p">(</span><span class="n">TimeSpan</span><span class="w"> </span><span class="n">timeSpan</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="n">workerPeriod</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">timeSpan</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="new-behaviour-types">
+<h2>New Behaviour Types<a class="headerlink" href="#new-behaviour-types" title="Permalink to this headline"></a></h2>
+<p>The types of workers can be extended by creating new types that implement <cite>IBackgroundProcessor</cite></p>
+<ul class="simple">
+<li><p>create a new processor</p></li>
+</ul>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">MyProcessor</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IBackgroundProcessor</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>create an extension method and use the <cite>BackgroundWorker&lt;&gt;</cite></p></li>
+</ul>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="n">AddWorkerProgramabilityTimer</span><span class="p">&lt;</span><span class="n">TWorkerProcess</span><span class="p">&gt;(</span><span class="w"></span>
+<span class="w">    </span><span class="k">this</span><span class="w"> </span><span class="n">IServiceCollection</span><span class="w"> </span><span class="n">services</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">where</span><span class="w"> </span><span class="n">TWorkerProcess</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">class</span><span class="p">,</span><span class="w"> </span><span class="n">IWorkerProcess</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">services</span><span class="p">.</span><span class="n">TryAddScoped</span><span class="p">&lt;</span><span class="n">TWorkerProcess</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w">    </span><span class="n">services</span><span class="p">.</span><span class="n">AddHostedService</span><span class="p">&lt;</span><span class="n">BackgroundWorker</span><span class="p">&lt;</span><span class="n">TWorkerProcess</span><span class="p">&gt;&gt;(</span><span class="n">sp</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">BackgroundWorker</span><span class="p">&lt;</span><span class="n">TWorkerProcess</span><span class="p">&gt;(</span><span class="w"></span>
+<span class="w">            </span><span class="n">backgroundWorker</span><span class="p">:</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MyProcessor</span><span class="p">(),</span><span class="w"></span>
+<span class="w">            </span><span class="n">loggerFactory</span><span class="p">:</span><span class="w"> </span><span class="n">sp</span><span class="p">.</span><span class="n">GetService</span><span class="p">&lt;</span><span class="n">ILoggerFactory</span><span class="p">&gt;(),</span><span class="w"></span>
+<span class="w">            </span><span class="n">processFactory</span><span class="p">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">sp</span><span class="p">.</span><span class="n">CreateScope</span><span class="p">().</span><span class="n">ServiceProvider</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">TWorkerProcess</span><span class="p">&gt;());</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
