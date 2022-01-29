@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Store &mdash; distributed 1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Custom IOutboxRepository&lt;T&gt;" href="stores/outbox-service-custom-repository.html" />
+    <link rel="prev" title="Register Events" href="outbox-service-register-events.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> distributed
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../outbox.html">OUTBOX</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../outbox-service.html">Outbox Service</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="outbox-service-aspnet.html">Asp Net Registration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="outbox-service-register-events.html">Register Events</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Store</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stores/outbox-service-custom-repository.html">Custom IOutboxRepository&lt;T&gt;</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stores/outbox-service-mongo-builtin.html">Mongo with builtin repository</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../outbox-worker.html">Outbox Worker</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">distributed</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../outbox.html">OUTBOX</a> &raquo;</li>
+          <li><a href="../outbox-service.html">Outbox Service</a> &raquo;</li>
+      <li>Store</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/pages/outbox-service/outbox-service-store.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="store">
+<h1>Store<a class="headerlink" href="#store" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<section id="internals">
+<h2>Internals<a class="headerlink" href="#internals" title="Permalink to this headline"></a></h2>
+<p>To understand how a store is configured, it’s important to know about the internals.</p>
+<p>The outbox service will use the <code class="code cs docutils literal notranslate"><span class="name"><span class="pre">IOutboxStorage</span></span><span class="punctuation"><span class="pre">&lt;</span></span><span class="name"><span class="pre">TIntegrationMessageLog</span></span><span class="punctuation"><span class="pre">&gt;</span></span></code> which contains all
+methods that the service and the worker actually needs. The outbox storage is does not contain
+information about how the data is persisted, it uses internally an <code class="code cs docutils literal notranslate"><span class="name"><span class="pre">IOutboxRepository</span></span></code> to do that.</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w"> </span><span class="k">interface</span><span class="w"> </span><span class="n">IOutboxStorage</span><span class="p">&lt;</span><span class="n">TMessage</span><span class="p">&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="k">where</span><span class="w"> </span><span class="n">TMessage</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">class</span><span class="p">,</span><span class="w"> </span><span class="n">IIntegrationMessageLog</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="w"> </span><span class="nf">InsertAsync</span><span class="p">(</span><span class="n">TMessage</span><span class="w"> </span><span class="n">item</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="w"> </span><span class="nf">UpdateAsync</span><span class="p">(</span><span class="n">TMessage</span><span class="w"> </span><span class="n">item</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="w"> </span><span class="nf">DeleteAsync</span><span class="p">(</span><span class="n">TMessage</span><span class="w"> </span><span class="n">item</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="p">&lt;</span><span class="kt">bool</span><span class="p">&gt;</span><span class="w"> </span><span class="n">ExistsAsync</span><span class="p">(</span><span class="n">Guid</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="p">&lt;</span><span class="n">TMessage</span><span class="p">&gt;</span><span class="w"> </span><span class="n">FindAsync</span><span class="p">(</span><span class="n">Guid</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="p">&lt;</span><span class="n">List</span><span class="p">&lt;</span><span class="n">TMessage</span><span class="p">&gt;&gt;</span><span class="w"> </span><span class="n">FindAsync</span><span class="p">(</span><span class="n">FinderMessageLog</span><span class="w"> </span><span class="n">finder</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="p">&lt;</span><span class="kt">bool</span><span class="p">&gt;</span><span class="w"> </span><span class="n">LockAsync</span><span class="p">(</span><span class="n">TMessage</span><span class="w"> </span><span class="n">entity</span><span class="p">,</span><span class="w"> </span><span class="n">TimeSpan</span><span class="w"> </span><span class="n">span</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="p">&lt;</span><span class="kt">bool</span><span class="p">&gt;</span><span class="w"> </span><span class="n">UnlockAsync</span><span class="p">(</span><span class="n">TMessage</span><span class="w"> </span><span class="n">entity</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Both the outbox storage and outbox repository have different implementation depending on the persistance medium (sql, inmemory, custom, mongo).</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w"> </span><span class="k">interface</span><span class="w"> </span><span class="n">IOutboxRepository</span><span class="p">&lt;</span><span class="n">TMessage</span><span class="p">&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="k">where</span><span class="w"> </span><span class="n">TMessage</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">class</span><span class="p">,</span><span class="w"> </span><span class="n">IIntegrationMessageLog</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="w"> </span><span class="nf">DeleteAsync</span><span class="p">(</span><span class="n">TMessage</span><span class="w"> </span><span class="n">entity</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="p">&lt;</span><span class="kt">bool</span><span class="p">&gt;</span><span class="w"> </span><span class="n">ExistsAsync</span><span class="p">(</span><span class="n">Guid</span><span class="w"> </span><span class="n">entityId</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="p">&lt;</span><span class="n">TMessage</span><span class="p">&gt;</span><span class="w"> </span><span class="n">FindAsync</span><span class="p">(</span><span class="n">Guid</span><span class="w"> </span><span class="n">entityId</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="w"> </span><span class="nf">InsertAsync</span><span class="p">(</span><span class="n">TMessage</span><span class="w"> </span><span class="n">entity</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="w"> </span><span class="nf">UpdateAsync</span><span class="p">(</span><span class="n">TMessage</span><span class="w"> </span><span class="n">entity</span><span class="p">,</span><span class="w"> </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">Task</span><span class="p">&lt;</span><span class="n">List</span><span class="p">&lt;</span><span class="n">TMessage</span><span class="p">&gt;&gt;</span><span class="w"> </span><span class="n">FindAsync</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="n">FinderMessageLog</span><span class="w"> </span><span class="n">findOptions</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">CancellationToken</span><span class="w"> </span><span class="n">cancellationToken</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">default</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="outbox-service-register-events.html" class="btn btn-neutral float-left" title="Register Events" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="stores/outbox-service-custom-repository.html" class="btn btn-neutral float-right" title="Custom IOutboxRepository&lt;T&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rami Hamati.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

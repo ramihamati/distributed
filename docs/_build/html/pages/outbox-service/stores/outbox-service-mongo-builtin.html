@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mongo with builtin repository &mdash; distributed 1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Outbox Worker" href="../../outbox-worker.html" />
+    <link rel="prev" title="Custom IOutboxRepository&lt;T&gt;" href="outbox-service-custom-repository.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> distributed
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../outbox.html">OUTBOX</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../outbox-service.html">Outbox Service</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../outbox-service-aspnet.html">Asp Net Registration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../outbox-service-register-events.html">Register Events</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../outbox-service-store.html">Store</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="outbox-service-custom-repository.html">Custom IOutboxRepository&lt;T&gt;</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Mongo with builtin repository</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../outbox-worker.html">Outbox Worker</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">distributed</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../outbox.html">OUTBOX</a> &raquo;</li>
+          <li><a href="../../outbox-service.html">Outbox Service</a> &raquo;</li>
+          <li><a href="../outbox-service-store.html">Store</a> &raquo;</li>
+      <li>Mongo with builtin repository</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/pages/outbox-service/stores/outbox-service-mongo-builtin.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mongo-with-builtin-repository">
+<h1>Mongo with builtin repository<a class="headerlink" href="#mongo-with-builtin-repository" title="Permalink to this headline"></a></h1>
+<section id="package">
+<h2>Package<a class="headerlink" href="#package" title="Permalink to this headline"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">&lt;PackageReference Include=&quot;ComX.Infrastructure.Distributed.Outbox.Aspnet&quot; Version=&quot;x.x.x&quot;&gt;</span><span class="w"></span>
+<span class="l l-Scalar l-Scalar-Plain">&lt;PackageReference Include=&quot;ComX.Infrastructure.Distributed.Outbox.Store.Mongo&quot; Version=&quot;x.x.x&quot;&gt;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="about">
+<h2>About<a class="headerlink" href="#about" title="Permalink to this headline"></a></h2>
+<p>Using this method will allow you to only specify the mongo connection details leaving
+the outbox service to deal with the mongo manager and repositories</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigurationMongo</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IOutboxMongoSettings</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ConnectionString</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">set</span><span class="p">;}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">TimeSpan</span><span class="w"> </span><span class="n">ConnectionTimeout</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">set</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromMinutes</span><span class="p">(</span><span class="m">1</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">DbName</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">set</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">CollectionName</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="k">set</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="nf">TestConfigurationMongo</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="kt">string</span><span class="w"> </span><span class="n">connectionString</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="kt">string</span><span class="w"> </span><span class="n">dbName</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="kt">string</span><span class="w"> </span><span class="n">collectionName</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">ConnectionString</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">connectionString</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">DbName</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">dbName</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">CollectionName</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">collectionName</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="n">ConfigurationMongo</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">new</span><span class="p">(</span><span class="w"></span>
+<span class="n">MongoConnectionString</span><span class="p">,</span><span class="w"></span>
+<span class="s">&quot;outbox&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="s">&quot;outbox&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="n">serviceCollection</span><span class="p">.</span><span class="n">AddOutboxService</span><span class="p">(</span><span class="n">cfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">RegisterEvents</span><span class="p">(</span><span class="n">reg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventOne</span><span class="p">&gt;(</span><span class="n">EVENT_ONE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventTwo</span><span class="p">&gt;(</span><span class="n">EVENT_TWO_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventThree</span><span class="p">&gt;(</span><span class="n">EVENT_THREE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureStore</span><span class="p">(</span><span class="n">storeCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">storeCfg</span><span class="p">.</span><span class="n">UseMongoStore</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span><span class="w"> </span><span class="n">mCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">mCfg</span><span class="p">.</span><span class="n">UseBuiltInRepository</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="p">});</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureSerializer</span><span class="p">(</span><span class="n">sCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">sCfg</span><span class="p">.</span><span class="n">UseMassTransitSerializer</span><span class="p">());</span><span class="w"></span>
+<span class="p">});</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="outbox-service-custom-repository.html" class="btn btn-neutral float-left" title="Custom IOutboxRepository&lt;T&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../outbox-worker.html" class="btn btn-neutral float-right" title="Outbox Worker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rami Hamati.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
