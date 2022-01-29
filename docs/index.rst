@@ -16,6 +16,7 @@ Welcome to distributed's documentation!
    pages/worker-process
    
 Frameworks developed for a distributed scenario:
+
 * OutboxPattern as a service
 * InboxPattern as a service
 * WorkerTimer - a custom programable worker
