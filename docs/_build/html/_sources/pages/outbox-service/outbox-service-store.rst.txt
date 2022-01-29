@@ -9,6 +9,10 @@ Store
 
    stores/outbox-service-custom-repository
    stores/outbox-service-mongo-builtin
+   stores/outbox-service-mongo-externalrepo
+   stores/outbox-service-mongo-wrapperrepo
+   stores/outbox-service-sql-builtin
+   stores/outbox-service-external-db-context-urf
 
 .. role:: yaml(code)
    :language: yaml 

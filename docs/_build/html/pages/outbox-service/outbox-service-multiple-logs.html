@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multiple Log Types &mdash; distributed 1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Outbox Worker" href="../outbox-worker.html" />
+    <link rel="prev" title="Serializer" href="outbox-service-serializer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> distributed
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../outbox.html">OUTBOX SERVICE</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../outbox-service.html">Outbox Service</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="outbox-service-aspnet.html">Asp Net Registration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="outbox-service-register-events.html">Register Events</a></li>
+<li class="toctree-l3"><a class="reference internal" href="outbox-service-store.html">Store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="outbox-service-serializer.html">Serializer</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Multiple Log Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../outbox-worker.html">Outbox Worker</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">distributed</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../outbox.html">OUTBOX SERVICE</a> &raquo;</li>
+          <li><a href="../outbox-service.html">Outbox Service</a> &raquo;</li>
+      <li>Multiple Log Types</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/pages/outbox-service/outbox-service-multiple-logs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="multiple-log-types">
+<h1>Multiple Log Types<a class="headerlink" href="#multiple-log-types" title="Permalink to this headline"></a></h1>
+<p>By default the outbox service will chose the builtin entity <cite>IntegrationMessageLog</cite> to save the event into. This is attached
+to one repository.
+If we want to save each event in a different repository, we have to
+* define new message logs implementing <cite>IIntegrationMessageLog</cite> or extending <cite>IntegrationMessageLog</cite>
+* define transforms (From event to log and backwards)
+* register the repositories</p>
+<section id="transforms-with-auto-mapper">
+<h2>Transforms with auto mapper:<a class="headerlink" href="#transforms-with-auto-mapper" title="Permalink to this headline"></a></h2>
+<p>Package:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">&lt;PackageReference Include=&quot;ComX.Infrastructure.Distributed.Outbox.AutoMapper&quot; Version=&quot;x.x.x&quot;&gt;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Usage:</p>
+<p>The transforms service will use the automapper mapper, but it will not inject it. It’s
+your responsability to do so</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">services</span><span class="p">.</span><span class="n">AddAutoMapper</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">Program</span><span class="p">).</span><span class="n">Assembly</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">services</span><span class="p">.</span><span class="n">AddOutboxService</span><span class="p">(</span><span class="n">cfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// code omitted</span>
+<span class="w">        </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureTransforms</span><span class="p">(</span><span class="n">trCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">trCfg</span><span class="p">.</span><span class="n">Cfg</span><span class="p">.</span><span class="n">UseAutomapperTransformations</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="n">trCfg</span><span class="p">.</span><span class="n">RegisterTransform</span><span class="p">&lt;</span><span class="n">IEventOne</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w">        </span><span class="p">});</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// code omitted</span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="transforms-custom">
+<h2>Transforms Custom<a class="headerlink" href="#transforms-custom" title="Permalink to this headline"></a></h2>
+<p>Create a service that implements <cite>IOutboxTransformer</cite></p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">AutoMapperService</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IOutboxTransformer</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">private</span><span class="w"> </span><span class="k">readonly</span><span class="w"> </span><span class="n">IServiceScopeFactory</span><span class="w"> </span><span class="n">_serviceScopeFactory</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="nf">AutoMapperService</span><span class="p">(</span><span class="n">IServiceScopeFactory</span><span class="w"> </span><span class="n">serviceScopeFactory</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">_serviceScopeFactory</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">serviceScopeFactory</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">TTransformed</span><span class="w"> </span><span class="n">Transform</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span><span class="w"> </span><span class="n">TTransformed</span><span class="p">&gt;(</span><span class="n">TSource</span><span class="w"> </span><span class="n">source</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">using</span><span class="w"> </span><span class="nn">var</span><span class="w"> </span><span class="n">scope</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">_serviceScopeFactory</span><span class="p">.</span><span class="n">CreateScope</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">IMapper</span><span class="w"> </span><span class="n">mapper</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">scope</span><span class="p">.</span><span class="n">ServiceProvider</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">IMapper</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">mapper</span><span class="p">.</span><span class="n">Map</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span><span class="w"> </span><span class="n">TTransformed</span><span class="p">&gt;(</span><span class="n">source</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Create an extension method:</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ExtensionsOutboxAutoMapper</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">UseAutomapperTransformations</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="k">this</span><span class="w"> </span><span class="n">IConfiguratorTransformer</span><span class="w"> </span><span class="n">configurator</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">configurator</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">Context</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">Services</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">IOutboxTransformer</span><span class="p">,</span><span class="w"> </span><span class="n">AutoMapperService</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="example-using-multiple-log-types">
+<h2>Example Using multiple log types:<a class="headerlink" href="#example-using-multiple-log-types" title="Permalink to this headline"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Create the new entity</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">CustomMessageLog</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IntegrationMessageLog</span><span class="w"></span>
+<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Create the database context</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">MultipleLogDataContext</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">DbContext</span><span class="w"></span>
+<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="k">public</span><span class="w"> </span><span class="nf">MultipleLogDataContext</span><span class="p">(</span><span class="n">DbContextOptions</span><span class="p">&lt;</span><span class="n">MultipleLogDataContext</span><span class="p">&gt;</span><span class="w"> </span><span class="n">options</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="k">base</span><span class="p">(</span><span class="n">options</span><span class="p">)</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">     </span><span class="k">protected</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">OnModelCreating</span><span class="p">(</span><span class="n">ModelBuilder</span><span class="w"> </span><span class="n">modelBuilder</span><span class="p">)</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="k">new</span><span class="w"> </span><span class="nf">IntegrationMessageLogMap</span><span class="p">(</span><span class="s">&quot;TableOne&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">             </span><span class="p">.</span><span class="n">Configure</span><span class="p">(</span><span class="n">modelBuilder</span><span class="p">.</span><span class="n">Entity</span><span class="p">&lt;</span><span class="n">IntegrationMessageLog</span><span class="p">&gt;());</span><span class="w"></span>
+
+<span class="w">         </span><span class="k">new</span><span class="w"> </span><span class="n">IntegrationMessageLogMap</span><span class="p">&lt;</span><span class="n">CustomMessageLog</span><span class="p">&gt;(</span><span class="s">&quot;TableTwo&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">             </span><span class="p">.</span><span class="n">Configure</span><span class="p">(</span><span class="n">modelBuilder</span><span class="p">.</span><span class="n">Entity</span><span class="p">&lt;</span><span class="n">CustomMessageLog</span><span class="p">&gt;());</span><span class="w"></span>
+
+<span class="w">         </span><span class="k">base</span><span class="p">.</span><span class="n">OnModelCreating</span><span class="p">(</span><span class="n">modelBuilder</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Create the automapper profile</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ProfileCustomMessageLog</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">Profile</span><span class="w"></span>
+<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="k">public</span><span class="w"> </span><span class="nf">ProfileCustomMessageLog</span><span class="p">()</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="n">CreateMap</span><span class="p">&lt;</span><span class="n">IEventOne</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="p">&gt;()</span><span class="w"></span>
+<span class="w">             </span><span class="p">.</span><span class="n">ConstructUsing</span><span class="p">((</span><span class="n">Func</span><span class="p">&lt;</span><span class="n">IEventOne</span><span class="p">,</span><span class="w"> </span><span class="n">ResolutionContext</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="p">&gt;)((</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">             </span><span class="p">{</span><span class="w"></span>
+<span class="w">                 </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="w"></span>
+<span class="w">                 </span><span class="p">{</span><span class="w"></span>
+<span class="w">                     </span><span class="n">Id</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Guid</span><span class="p">.</span><span class="n">NewGuid</span><span class="p">(),</span><span class="w"></span>
+<span class="w">                     </span><span class="n">MessageTypeName</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Consts</span><span class="p">.</span><span class="n">EVENT_ONE_NAME</span><span class="p">,</span><span class="w"></span>
+<span class="w">                     </span><span class="n">MessageBody</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">JsonConvert</span><span class="p">.</span><span class="n">SerializeObject</span><span class="p">(</span><span class="n">model</span><span class="p">),</span><span class="w"></span>
+<span class="w">                     </span><span class="n">Status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">OutboxStatus</span><span class="p">.</span><span class="n">NotPublished</span><span class="w"></span>
+<span class="w">                 </span><span class="p">};</span><span class="w"></span>
+<span class="w">             </span><span class="p">}));</span><span class="w"></span>
+
+<span class="w">         </span><span class="n">CreateMap</span><span class="p">&lt;</span><span class="n">IEventTwo</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="p">&gt;()</span><span class="w"></span>
+<span class="w">             </span><span class="p">.</span><span class="n">ConstructUsing</span><span class="p">((</span><span class="n">Func</span><span class="p">&lt;</span><span class="n">IEventTwo</span><span class="p">,</span><span class="w"> </span><span class="n">ResolutionContext</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="p">&gt;)((</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">             </span><span class="p">{</span><span class="w"></span>
+<span class="w">                 </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="w"></span>
+<span class="w">                 </span><span class="p">{</span><span class="w"></span>
+<span class="w">                     </span><span class="n">Id</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Guid</span><span class="p">.</span><span class="n">NewGuid</span><span class="p">(),</span><span class="w"></span>
+<span class="w">                     </span><span class="n">MessageTypeName</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Consts</span><span class="p">.</span><span class="n">EVENT_TWO_NAME</span><span class="p">,</span><span class="w"></span>
+<span class="w">                     </span><span class="n">MessageBody</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">JsonConvert</span><span class="p">.</span><span class="n">SerializeObject</span><span class="p">(</span><span class="n">model</span><span class="p">),</span><span class="w"></span>
+<span class="w">                     </span><span class="n">Status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">OutboxStatus</span><span class="p">.</span><span class="n">NotPublished</span><span class="w"></span>
+<span class="w">                 </span><span class="p">};</span><span class="w"></span>
+<span class="w">             </span><span class="p">}));</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">Register the service</span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">     </span><span class="n">services</span><span class="p">.</span><span class="n">AddAutoMapper</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">Program</span><span class="p">).</span><span class="n">Assembly</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">     </span><span class="n">services</span><span class="p">.</span><span class="n">AddDbContext</span><span class="p">&lt;</span><span class="n">MultipleLogDataContext</span><span class="p">&gt;(</span><span class="n">options</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="n">options</span><span class="p">.</span><span class="n">UseSqlite</span><span class="p">(</span><span class="n">DbConnection</span><span class="p">);</span><span class="w"></span>
+<span class="w">     </span><span class="p">},</span><span class="w"> </span><span class="n">ServiceLifetime</span><span class="p">.</span><span class="n">Scoped</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">     </span><span class="n">services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">DbContext</span><span class="p">,</span><span class="w"> </span><span class="n">MultipleLogDataContext</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w">     </span><span class="n">services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">IUnitOfWork</span><span class="p">,</span><span class="w"> </span><span class="n">MultipleLogUnitOfWork</span><span class="p">&gt;();</span><span class="w"></span>
+
+<span class="w">     </span><span class="n">services</span><span class="p">.</span><span class="n">AddOutboxService</span><span class="p">(</span><span class="n">cfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureEvents</span><span class="p">(</span><span class="n">reg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">         </span><span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventOne</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="p">&gt;(</span><span class="n">Consts</span><span class="p">.</span><span class="n">EVENT_ONE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">             </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventTwo</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="p">&gt;(</span><span class="n">Consts</span><span class="p">.</span><span class="n">EVENT_TWO_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">             </span><span class="c1">// event tree will use the default IntegrationMessageLog</span>
+<span class="w">             </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventThree</span><span class="p">&gt;(</span><span class="n">Consts</span><span class="p">.</span><span class="n">EVENT_THREE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">         </span><span class="p">});</span><span class="w"></span>
+<span class="w">         </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureTransforms</span><span class="p">(</span><span class="n">trCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">         </span><span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="n">trCfg</span><span class="p">.</span><span class="n">Cfg</span><span class="p">.</span><span class="n">UseAutomapperTransformations</span><span class="p">();</span><span class="w"></span>
+<span class="w">             </span><span class="n">trCfg</span><span class="p">.</span><span class="n">RegisterTransform</span><span class="p">&lt;</span><span class="n">IEventOne</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w">             </span><span class="n">trCfg</span><span class="p">.</span><span class="n">RegisterTransform</span><span class="p">&lt;</span><span class="n">IEventTwo</span><span class="p">,</span><span class="w"> </span><span class="n">CustomMessageLog</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w">         </span><span class="p">});</span><span class="w"></span>
+<span class="w">         </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureStore</span><span class="p">(</span><span class="n">storeCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">         </span><span class="p">{</span><span class="w"></span>
+<span class="w">             </span><span class="n">storeCfg</span><span class="p">.</span><span class="n">UseUrfStore</span><span class="p">(</span><span class="n">efCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">             </span><span class="p">{</span><span class="w"></span>
+<span class="w">                 </span><span class="n">efCfg</span><span class="p">.</span><span class="n">UseRepository</span><span class="p">&lt;</span><span class="n">IntegrationMessageLog</span><span class="p">,</span><span class="w"> </span><span class="n">MultipleLogDataContext</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w">                 </span><span class="n">efCfg</span><span class="p">.</span><span class="n">UseRepository</span><span class="p">&lt;</span><span class="n">CustomMessageLog</span><span class="p">,</span><span class="w"> </span><span class="n">MultipleLogDataContext</span><span class="p">&gt;();</span><span class="w"></span>
+<span class="w">             </span><span class="p">});</span><span class="w"></span>
+<span class="w">         </span><span class="p">});</span><span class="w"></span>
+<span class="w">         </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureSerializer</span><span class="p">(</span><span class="n">sCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">sCfg</span><span class="p">.</span><span class="n">UseMassTransitSerializer</span><span class="p">());</span><span class="w"></span>
+<span class="w">     </span><span class="p">});</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="outbox-service-serializer.html" class="btn btn-neutral float-left" title="Serializer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../outbox-worker.html" class="btn btn-neutral float-right" title="Outbox Worker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rami Hamati.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

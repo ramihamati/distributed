@@ -18,7 +18,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Asp Net Registration" href="outbox-service-adding.html" /> 
+    <link rel="next" title="Publisher MassTransit Broker" href="outbox-worker/publisher-masstransit-broker.html" />
+    <link rel="prev" title="Multiple Log Types" href="outbox-service/outbox-service-multiple-logs.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,13 +39,17 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="outbox.html">OUTBOX</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="outbox.html">OUTBOX SERVICE</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="outbox-service.html">Outbox Service</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Outbox Worker</a><ul class="simple">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Outbox Worker</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="outbox-worker/publisher-masstransit-broker.html">Publisher MassTransit Broker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="outbox-worker/publisher-masstransit-mediator.html">Publisher MassTransit Mediator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="outbox-worker/publisher-custom.html">Publisher Custom</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="worker-process.html">WORKER PROCESS</a></li>
 </ul>
 
         </div>
@@ -61,7 +66,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="outbox.html">OUTBOX</a> &raquo;</li>
+          <li><a href="outbox.html">OUTBOX SERVICE</a> &raquo;</li>
       <li>Outbox Worker</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/pages/outbox-worker.rst.txt" rel="nofollow"> View page source</a>
@@ -76,13 +81,56 @@
 <h1>Outbox Worker<a class="headerlink" href="#outbox-worker" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<p>The outbox worker has the responsibility of reading events from the database and publishes them.
+The design of the worker is made so that
+* it runs in an isolated container (ServiceProvider), automatically taking all external dependencies (repositories, context) from the parent container. With this setup we can have as many outboxworkers as we want in our backgroundhost and each will run in it’s own configuration.
+* it has the same configuration of the store as the <cite>IOutboxService</cite>
+* it has the same configuration of the events registration as the <cite>IOutboxService</cite></p>
+<p>The worker uses the <a class="reference internal" href="worker-process.html#workerprocess"><span class="std std-ref">Worker Process</span></a> which will ensure that the worker will trigger on a period basis, but
+multiple threads will be spawned. If the worker is still busy while the timer is triggered, the intent of re-processing is stored and current
+activity is continued.</p>
+<p>Because the worker has to publish, we have to register the publisher in our worker.</p>
+<p>Example</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">ConfigureServices</span><span class="p">(</span><span class="n">IServiceCollection</span><span class="w"> </span><span class="n">services</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">ConfigurationOutboxWorker</span><span class="p">&gt;(</span><span class="w"></span>
+<span class="w">                  </span><span class="n">_</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ConfigurationOutboxWorker</span><span class="p">(</span><span class="n">_workerPeriod</span><span class="p">,</span><span class="w"> </span><span class="n">_timeBetweenRetries</span><span class="p">));</span><span class="w"></span>
+
+<span class="w">   </span><span class="n">services</span><span class="p">.</span><span class="n">AddOutboxWorker</span><span class="p">&lt;</span><span class="n">ConfigurationOutboxWorker</span><span class="p">&gt;(</span><span class="n">cfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureEvents</span><span class="p">(</span><span class="n">reg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">         </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventOne</span><span class="p">&gt;(</span><span class="n">EVENT_ONE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventTwo</span><span class="p">&gt;(</span><span class="n">EVENT_TWO_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventThree</span><span class="p">&gt;(</span><span class="n">EVENT_THREE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">         </span><span class="p">});</span><span class="w"></span>
+
+<span class="w">         </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureStore</span><span class="p">(</span><span class="n">storeCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">         </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">storeCfg</span><span class="p">.</span><span class="n">UseMongoStore</span><span class="p">(</span><span class="n">_configuration</span><span class="p">,</span><span class="w"> </span><span class="n">mCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="n">mCfg</span><span class="p">.</span><span class="n">UseBuiltInRepository</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="p">});</span><span class="w"></span>
+<span class="w">         </span><span class="p">});</span><span class="w"></span>
+<span class="w">         </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigurePublisher</span><span class="p">(</span><span class="n">pubCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">         </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">pubCfg</span><span class="p">.</span><span class="n">UseMassTransitPublisher</span><span class="p">();</span><span class="w"></span>
+<span class="w">         </span><span class="p">});</span><span class="w"></span>
+<span class="w">         </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureSerializer</span><span class="p">(</span><span class="n">ser</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">ser</span><span class="p">.</span><span class="n">UseMassTransitSerializer</span><span class="p">());</span><span class="w"></span>
+<span class="w">   </span><span class="p">});</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>You can register the outbox worker multiple times in the same application. It runs on an isolated container and will be
+a different background worker.</p>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="outbox-service-adding.html" class="btn btn-neutral float-left" title="Asp Net Registration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="outbox-service/outbox-service-multiple-logs.html" class="btn btn-neutral float-left" title="Multiple Log Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="outbox-worker/publisher-masstransit-broker.html" class="btn btn-neutral float-right" title="Publisher MassTransit Broker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

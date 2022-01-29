@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sql/Sqlite with builtin context &mdash; distributed 1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Sql/Sqlite with external db context and URF Repository" href="outbox-service-external-db-context-urf.html" />
+    <link rel="prev" title="Mongo with wrapped repository" href="outbox-service-mongo-wrapperrepo.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> distributed
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../outbox.html">OUTBOX SERVICE</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../outbox-service.html">Outbox Service</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../outbox-service-aspnet.html">Asp Net Registration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../outbox-service-register-events.html">Register Events</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../outbox-service-store.html">Store</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="outbox-service-custom-repository.html">Custom IOutboxRepository&lt;T&gt;</a></li>
+<li class="toctree-l4"><a class="reference internal" href="outbox-service-mongo-builtin.html">Mongo with builtin repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="outbox-service-mongo-externalrepo.html">Mongo with external repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="outbox-service-mongo-wrapperrepo.html">Mongo with wrapped repository</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Sql/Sqlite with builtin context</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Sql/Sqlite with builtin context</a></li>
+<li class="toctree-l4"><a class="reference internal" href="outbox-service-external-db-context-urf.html">Sql/Sqlite with external db context and URF Repository</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../outbox-worker.html">Outbox Worker</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">distributed</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../outbox.html">OUTBOX SERVICE</a> &raquo;</li>
+          <li><a href="../../outbox-service.html">Outbox Service</a> &raquo;</li>
+          <li><a href="../outbox-service-store.html">Store</a> &raquo;</li>
+      <li>Sql/Sqlite with builtin context</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/pages/outbox-service/stores/outbox-service-sql-builtin.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sql-sqlite-with-builtin-context">
+<h1>Sql/Sqlite with builtin context<a class="headerlink" href="#sql-sqlite-with-builtin-context" title="Permalink to this headline"></a></h1>
+<section id="package">
+<h2>Package<a class="headerlink" href="#package" title="Permalink to this headline"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">&lt;PackageReference Include=&quot;ComX.Infrastructure.Distributed.Outbox.Aspnet&quot; Version=&quot;x.x.x&quot;&gt;</span><span class="w"></span>
+<span class="l l-Scalar l-Scalar-Plain">&lt;PackageReference Include=&quot;ComX.Infrastructure.Distributed.Outbox.Store.Sql&quot; Version=&quot;x.x.x&quot;&gt;</span><span class="w"></span>
+<span class="l l-Scalar l-Scalar-Plain">&lt;PackageReference Include=&quot;ComX.Infrastructure.Distributed.Outbox.Store.Sqlite&quot; Version=&quot;x.x.x&quot;&gt;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="about">
+<h2>About<a class="headerlink" href="#about" title="Permalink to this headline"></a></h2>
+<p>This method will add a predefined OutboxDataContext and will use a custom UoW and Repository to persist data.
+Transactions are not considered because the context is not used by the caller.
+Use this approach if you don’t care about persisting data in a transactional commit with other entities from the caller app.</p>
+<p>The default entity used is the <code class="code cs docutils literal notranslate"><span class="name"><span class="pre">IntegrationMessageLog</span></span></code> and the db context will search for a tabled named <cite>IntegrationMessageLogs</cite></p>
+<p>The following map is used</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">IntegrationMessageLogMap</span><span class="p">&lt;</span><span class="n">TMessageLog</span><span class="p">&gt;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IEntityTypeConfiguration</span><span class="p">&lt;</span><span class="n">TMessageLog</span><span class="p">&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="k">where</span><span class="w"> </span><span class="n">TMessageLog</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">class</span><span class="p">,</span><span class="w"> </span><span class="n">IIntegrationMessageLog</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">private</span><span class="w"> </span><span class="k">readonly</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">_tableName</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="nf">IntegrationMessageLogMap</span><span class="p">(</span><span class="kt">string</span><span class="w"> </span><span class="n">tableName</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="n">_tableName</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">tableName</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">Configure</span><span class="p">(</span><span class="n">EntityTypeBuilder</span><span class="p">&lt;</span><span class="n">TMessageLog</span><span class="p">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">ToTable</span><span class="p">(</span><span class="n">_tableName</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">HasKey</span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">Id</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">Id</span><span class="p">)</span><span class="w"> </span><span class="p">.</span><span class="n">IsRequired</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">MessageBody</span><span class="p">).</span><span class="n">IsRequired</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">Status</span><span class="p">)</span><span class="w"> </span><span class="p">.</span><span class="n">IsRequired</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">MessageTypeName</span><span class="p">)</span><span class="w"> </span><span class="p">.</span><span class="n">IsRequired</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">CreatedAt</span><span class="p">)</span><span class="w"> </span><span class="p">.</span><span class="n">IsRequired</span><span class="p">().</span><span class="n">HasColumnType</span><span class="p">(</span><span class="s">&quot;datetime2&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">LastAttemptDate</span><span class="p">).</span><span class="n">HasColumnType</span><span class="p">(</span><span class="s">&quot;datetime2&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">LockUntil</span><span class="p">).</span><span class="n">HasColumnType</span><span class="p">(</span><span class="s">&quot;datetime2&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">RetryCount</span><span class="p">).</span><span class="n">IsRequired</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">LastError</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">Property</span><span class="p">(</span><span class="n">x</span><span class="p">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">Timestamp</span><span class="p">).</span><span class="n">IsConcurrencyToken</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="register-the-service">
+<h2>Register the service<a class="headerlink" href="#register-the-service" title="Permalink to this headline"></a></h2>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="n">serviceCollection</span><span class="p">.</span><span class="n">AddOutboxService</span><span class="p">(</span><span class="n">cfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">RegisterEvents</span><span class="p">(</span><span class="n">reg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventOne</span><span class="p">&gt;(</span><span class="n">EVENT_ONE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventTwo</span><span class="p">&gt;(</span><span class="n">EVENT_TWO_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventThree</span><span class="p">&gt;(</span><span class="n">EVENT_THREE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureStore</span><span class="p">(</span><span class="n">storeCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">storeCfg</span><span class="p">.</span><span class="n">UseSqliteStore</span><span class="p">(</span><span class="n">efCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">efCfg</span><span class="p">.</span><span class="n">UseBuiltInContext</span><span class="p">(</span><span class="n">DbConnection</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">});</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureSerializer</span><span class="p">(</span><span class="n">sCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">sCfg</span><span class="p">.</span><span class="n">UseMassTransitSerializer</span><span class="p">());</span><span class="w"></span>
+<span class="p">});</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="overloads">
+<h2>Overloads<a class="headerlink" href="#overloads" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><code class="code cs docutils literal notranslate"><span class="name"><span class="pre">ConfiguratorSqlStore</span></span><span class="whitespace"> </span><span class="name function"><span class="pre">UseBuiltInContext</span></span><span class="punctuation"><span class="pre">(</span></span><span class="name"><span class="pre">ISqlSettings</span></span><span class="whitespace"> </span><span class="name"><span class="pre">sqlSettings</span></span><span class="punctuation"><span class="pre">,</span></span><span class="whitespace"> </span><span class="name"><span class="pre">Action</span></span><span class="punctuation"><span class="pre">&lt;</span></span><span class="name"><span class="pre">SqlServerDbContextOptionsBuilder</span></span><span class="punctuation"><span class="pre">&gt;</span></span><span class="whitespace"> </span><span class="name"><span class="pre">builder</span></span><span class="whitespace"> </span><span class="punctuation"><span class="pre">=</span></span><span class="whitespace"> </span><span class="keyword"><span class="pre">null</span></span><span class="punctuation"><span class="pre">);</span></span></code></p></li>
+</ul>
+<p>This method configures the sql using a connection string</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="k">public</span><span class="w"> </span><span class="k">interface</span><span class="w"> </span><span class="n">ISqlSettings</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="n">ConnectionString</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxRetryCount</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">TimeSpan</span><span class="w"> </span><span class="n">MaxRetryDelay</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="code cs docutils literal notranslate"><span class="keyword"><span class="pre">public</span></span><span class="whitespace"> </span><span class="name"><span class="pre">ConfiguratorSqlStore</span></span><span class="whitespace"> </span><span class="name function"><span class="pre">UseBuiltInContext</span></span><span class="punctuation"><span class="pre">(</span></span><span class="name"><span class="pre">DbConnection</span></span><span class="whitespace"> </span><span class="name"><span class="pre">dbConnection</span></span><span class="punctuation"><span class="pre">,</span></span><span class="whitespace"> </span><span class="name"><span class="pre">Action</span></span><span class="punctuation"><span class="pre">&lt;</span></span><span class="name"><span class="pre">SqlServerDbContextOptionsBuilder</span></span><span class="punctuation"><span class="pre">&gt;</span></span><span class="whitespace"> </span><span class="name"><span class="pre">builder</span></span><span class="whitespace"> </span><span class="punctuation"><span class="pre">=</span></span><span class="whitespace"> </span><span class="keyword"><span class="pre">null</span></span><span class="punctuation"><span class="pre">)</span></span></code></p></li>
+</ul>
+<p>This method is usefull for unit tests:</p>
+<p>Example:</p>
+<div class="highlight-cs notranslate"><div class="highlight"><pre><span></span><span class="n">SqliteConnection</span><span class="w"> </span><span class="n">DbConnection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SqliteConnection</span><span class="p">(</span><span class="s">@&quot;Data Source = :memory:&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="n">DbConnection</span><span class="p">.</span><span class="n">Open</span><span class="p">();</span><span class="w"></span>
+
+<span class="n">SqliteCommand</span><span class="w"> </span><span class="n">command</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SqliteCommand</span><span class="p">(</span><span class="s">@&quot;</span>
+<span class="s">    CREATE TABLE IntegrationMessageLogs(</span>
+<span class="s">        Id text NOT NULL PRIMARY KEY,</span>
+<span class="s">        MessageBody text NOT NULL,</span>
+<span class="s">        Status int NOT NULL,</span>
+<span class="s">        MessageTypeName text NOT NULL,</span>
+<span class="s">        CreatedAt DATETIME NOT NULL,</span>
+<span class="s">        LastAttemptDate DATETIME NULL,</span>
+<span class="s">        LockUntil DATETIME NULL,</span>
+<span class="s">        RetryCount int NOT NULL,</span>
+<span class="s">        Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,</span>
+<span class="s">        LastError text)</span>
+<span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">DbConnection</span><span class="p">);</span><span class="w"></span>
+<span class="n">command</span><span class="p">.</span><span class="n">ExecuteNonQuery</span><span class="p">();</span><span class="w"></span>
+
+<span class="n">IServiceCollection</span><span class="w"> </span><span class="n">serviceCollection</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ServiceCollection</span><span class="p">();</span><span class="w"></span>
+
+<span class="n">serviceCollection</span><span class="p">.</span><span class="n">AddOutboxService</span><span class="p">(</span><span class="n">cfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureEvents</span><span class="p">(</span><span class="n">reg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventOne</span><span class="p">&gt;(</span><span class="n">EVENT_ONE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventTwo</span><span class="p">&gt;(</span><span class="n">EVENT_TWO_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">reg</span><span class="p">.</span><span class="n">RegisterMessage</span><span class="p">&lt;</span><span class="n">IEventThree</span><span class="p">&gt;(</span><span class="n">EVENT_THREE_NAME</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureStore</span><span class="p">(</span><span class="n">storeCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">storeCfg</span><span class="p">.</span><span class="n">UseSqliteStore</span><span class="p">(</span><span class="n">efCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">efCfg</span><span class="p">.</span><span class="n">UseBuiltInContext</span><span class="p">(</span><span class="n">DbConnection</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">});</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="w">    </span><span class="n">cfg</span><span class="p">.</span><span class="n">ConfigureSerializer</span><span class="p">(</span><span class="n">sCfg</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">sCfg</span><span class="p">.</span><span class="n">UseMassTransitSerializer</span><span class="p">());</span><span class="w"></span>
+<span class="p">});</span><span class="w"></span>
+
+<span class="n">ServiceProvider</span><span class="w"> </span><span class="n">Services</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">serviceCollection</span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">();</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="outbox-service-mongo-wrapperrepo.html" class="btn btn-neutral float-left" title="Mongo with wrapped repository" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="outbox-service-external-db-context-urf.html" class="btn btn-neutral float-right" title="Sql/Sqlite with external db context and URF Repository" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Rami Hamati.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

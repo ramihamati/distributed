@@ -13,10 +13,9 @@ Welcome to distributed's documentation!
    :caption: Contents:
 
    pages/outbox
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   pages/worker-process
+   
+Frameworks developed for a distributed scenario:
+* OutboxPattern as a service
+* InboxPattern as a service
+* WorkerTimer - a custom programable worker

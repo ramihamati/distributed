@@ -1,6 +1,6 @@
-======
-OUTBOX
-======
+==============
+OUTBOX SERVICE
+==============
 
 .. https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html
 .. toctree::
