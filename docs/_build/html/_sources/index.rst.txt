@@ -10,7 +10,6 @@ Welcome to distributed's documentation!
    :maxdepth: 2
    :titlesonly:
    :hidden:
-   :caption: Contents:
 
    pages/outbox
    pages/worker-process
